@@ -1,5 +1,6 @@
 package com.myhand.shanghaicitytourcard;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,7 +46,12 @@ public class MainActivity extends AppCompatActivity {
 
         //启动数据交换服务
         Intent dataExchangeService=new Intent(MainActivity.this, DataExchangeService.class);
-        startService(dataExchangeService);
+        ComponentName name=startService(dataExchangeService);
+        if(name==null){
+            Log.d(tag,"Service start failure");
+        }else{
+            Log.d(tag,"Service start OK,name:"+name.getShortClassName());
+        }
 
         // Example of a call to a native method
         TextView tv = (TextView) findViewById(R.id.sample_text);

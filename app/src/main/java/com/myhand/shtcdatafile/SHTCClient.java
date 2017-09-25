@@ -86,13 +86,14 @@ public class SHTCClient {
             writeStream=socket.getOutputStream();
 
             //开启接收线程
-            threadReadData.start();
+            //threadReadData.start();
 
             Bundle data=new Bundle();
             data.putString("msg","Socket Connect OK!");
             Message msg=handler.obtainMessage();
             msg.setData(data);
             handler.sendMessage(msg);
+            Log.d(tag,"服务器连接成功");
             return true;
         }catch (IOException ex){
             Message msg=handler.obtainMessage();
@@ -113,12 +114,16 @@ public class SHTCClient {
                 return;
             }
             String realSendStr=String.format("%04d%s",dataStr.length(),dataStr);
+            Log.d(tag,"realsenddata:"+realSendStr);
+
             byte[] sendData=realSendStr.getBytes();
             Log.d(tag,"Send Data:"+ HexUtil.bytesToHexString(sendData));
             writeStream.write(sendData, 0, sendData.length);
+            Log.d(tag,"Send OK");
             ShowMessage("数据成功发送");
-        }catch (IOException ex)
+        }catch (Exception ex)
         {
+            Log.d(tag,ex.getLocalizedMessage());
             ShowMessage("Send Data Exception:"+ex.getLocalizedMessage());
         }
     }
@@ -153,9 +158,12 @@ public class SHTCClient {
                     int count=readStream.available();
                     if(count>0)
                     {
+                        Log.d(tag,"Have data read.");
+/*
                         byte[] buffer=new byte[count];
                         readStream.read(buffer,0,count);
                         rcvBuffer.putData(buffer);
+*/
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

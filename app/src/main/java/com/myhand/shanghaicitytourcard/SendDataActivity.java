@@ -22,7 +22,8 @@ public class SendDataActivity extends AppCompatActivity {
     private SHTCClient client;
     //private String IP="168.10.5.96";
     //private String IP="192.168.100.109";
-    private String IP="130.233.2.124";
+    //private String IP="130.233.2.124";
+    private String IP="130.233.1.98";
     private int portUp=12581;
     private int portDown=12582;
     private TextView txtViewMessage;
@@ -61,7 +62,7 @@ public class SendDataActivity extends AppCompatActivity {
         //client=new SHTCClient("130.251.1.189",12581);
         client=new SHTCClient(IP,portUp);//("192.168.100.109",12581);
         client.setHandler(mHandler);
-        progressDialog=new ProgressDialog(SendDataActivity.this);
+        //progressDialog=new ProgressDialog(SendDataActivity.this);
 
         new Thread(runnable).start();
         rcvThread.start();
@@ -110,9 +111,9 @@ public class SendDataActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
-                    Log.d(tag, HexUtil.bytesToHexString(frameData));
+                    continue;
                 }
+                Log.d(tag, HexUtil.bytesToHexString(frameData));
             }
         }
     });
