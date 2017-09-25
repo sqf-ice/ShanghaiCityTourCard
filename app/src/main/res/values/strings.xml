@@ -1,0 +1,42 @@
+<resources>
+    <string name="app_name">上海都市旅游卡</string>
+    <string name="action_settings">设置</string>
+    <string name="title_activity_tour_card">都市旅游卡操作</string>
+    <string name="bind_service_fail">服务绑定失败</string>
+    <string name="bind_service_success">服务绑定成功</string>
+    <string name="title_activity_city_card_query">都市旅游卡查询</string>
+    <string name="rfcard_open_succ">非接卡成功打开</string>
+    <string name="rfcard_open_fail">非接卡打开失败</string>
+
+    <string name="psam_chose_type">psam设备索引变更，请重新执行打开操作</string>
+
+    <string name="psam_open_success">打开PSAM卡成功</string>
+
+    <string name="psam_open_failed">打开PSAM卡失败</string>
+
+    <string name="psam_reset_success">psam卡复位成功</string>
+
+    <string name="psam_reset_null">psam卡复位返回null</string>
+
+    <string name="psam_reset_exception">psam卡复位异常</string>
+
+    <string name="psam_send_apdu">发送APDU指令收到应答数据为</string>
+
+    <string name="psam_send_apdu_null">发送APDU指令应答数据为null</string>
+
+    <string name="psam_send_apdu_exception">发送APDU指令应答数据异常</string>
+
+    <string name="psam_set_etu_result">psam卡设置ETU时间操作结果</string>
+
+    <string name="psam_set_etu_exception">设置PSAM卡ETU时间异常</string>
+
+    <string name="psam_close_success">关闭PSAM卡成功</string>
+
+    <string name="psam_close_failed">关闭PSAM卡设备失败</string>
+
+    <string name="psam_close_exception">关闭PSAM卡设备异常</string>
+    <string name="title_activity_send_data">SendDataActivity</string>
+    <string name="title_activity_debit_query">消费记录查询</string>
+    <string name="title_activity_login">用户登录</string>
+
+</resources>
