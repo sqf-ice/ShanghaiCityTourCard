@@ -29,6 +29,7 @@ public class DataBlock {
 
     public void setFieldsLength(byte[] fieldsLength) {
         this.fieldsLength = fieldsLength;
+        this.data=new String(new byte[getDataFieldLength()]);
     }
 
     public int getFieldCount()
@@ -62,17 +63,26 @@ public class DataBlock {
 
     public String getDataField(int index)
     {
-        return data.substring(getFieldPos(index),fieldsLength[index]);
+        return data.substring(getFieldPos(index),fieldsLength[index]).trim();
     }
 
-    public void setDataField(int index,String fieldData)
+    public void setFieldData(int index,String fieldData)
     {
+        String fmtStr=String.format("%%-%ds",fieldsLength[index]);
+        String tmpStr=String.format(fmtStr,fieldData);
+
         if(index>0) {
             this.data = this.data.substring(getFieldPos(index));
         }
-        this.data+=fieldData;
+        this.data+=tmpStr;
+
         if(index<fieldsLength.length-1) {
             this.data += this.data.substring(getFieldPos(index + 1), getDataFieldLength());
         }
+    }
+
+    public void setFieldData(int index,int intData){
+        String fmtStr=String.format("%%0%dd",fieldsLength[index]);
+        setFieldData(index,String.format(fmtStr,intData));
     }
 }

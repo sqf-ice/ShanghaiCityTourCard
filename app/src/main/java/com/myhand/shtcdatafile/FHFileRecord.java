@@ -1,17 +1,21 @@
 package com.myhand.shtcdatafile;
 
+import com.myhand.cpucard.DebitRecord;
+
 /**
  * Created by wenha_000 on 2017-09-12.
  */
 
 public class FHFileRecord extends FileRecord {
-    private DataBlock dataBlock;
+    public FHFileRecord() {
+        setFieldsLength(new byte[]{11,8,2,6,16,6,6,2,12,4,12,2,8,8,8,6,6,8,8,2,0});
+        int length=getDataFieldLength();
+        setData(new String(new byte[length]));
+    }
 
-    public FHFileRecord(String unitCode,long localSeq,String stationID,String txnType,long posSeq,String cityCode,
-                        String cardFaceNum,String cardType,long balBef,long amount,String txnTime,int cardTxnCounter,
-                        String posID,String tac,int cardVer) {
-        dataBlock=new DataBlock();
-
+    public FHFileRecord(String unitCode, long localSeq, String stationID, String txnType, long posSeq, String cityCode,
+                        String cardFaceNum, String cardType, long balBef, long amount, String txnTime, int cardTxnCounter,
+                        String posID, String tac, int cardVer) {
         /**
          File Record Area（N）
          CorpId	N11	营运单位代码
@@ -36,9 +40,37 @@ public class FHFileRecord extends FileRecord {
          TradSpec	ANSVAR	行业特有数据	依据IsTSUsed而决定有无该域
          RtnSign	S1	回车符	’\n’
          */
-        dataBlock.setFieldsLength(new byte[]{11,8,2,6,16,6,6,2,12,4,12,2,8,8,8,6,6,8,8,2,0,1});
-        dataBlock.setData(String.format("%- 11s%08d00%06s%016s%06s%s%012d%s%s%s%08d%08d%s%06d%08s%08s%02d\n",
+        setFieldsLength(new byte[]{11,8,2,6,16,6,6,2,12,4,12,2,8,8,8,6,6,8,8,2,0});
+        setData(String.format("%- 11s%08d00%06s%016s%06s%s%012d%s%s%s%08d%08d%s%06d%08s%08s%02d\n",
                 unitCode,localSeq,"0","0","1",txnType,posSeq,cityCode,cardFaceNum,cardType,balBef,amount,txnTime,cardTxnCounter,
                 posID,tac,cardVer));
+    }
+
+    public void fromDebitRecord(DebitRecord record){
+        setFieldData(0,record.getCorpID());
+        setFieldData(1,(int)record.getLocalTxnSeq());
+        setFieldData(2,record.getTxnAttr());
+        setFieldData(3,record.getStationID());
+        setFieldData(4,record.getOprID());
+        setFieldData(5,record.getBusID());
+        setFieldData(6,record.getTxnType());
+        setFieldData(7,record.getPosSeq());
+        setFieldData(8,record.getCityCode());
+        setFieldData(9,record.getCardFaceNum());
+        setFieldData(10,record.getCardKind());
+        setFieldData(11,(int)record.getBalanceBef());
+        setFieldData(12,(int)record.getAmount());
+        setFieldData(13,record.getTxnTime());
+        setFieldData(14,record.getPosID());
+        setFieldData(15,record.getPosID());
+        setFieldData(16,record.getTac());
+        setFieldData(17,record.getCardVerNo());
+    }
+
+    public DebitRecord toDebitRecord(){
+        DebitRecord result=new DebitRecord();
+        result.setCorpID(getDataField(0));
+
+        return result;
     }
 }

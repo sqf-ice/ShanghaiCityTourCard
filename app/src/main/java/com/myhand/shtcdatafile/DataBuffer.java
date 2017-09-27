@@ -1,5 +1,11 @@
 package com.myhand.shtcdatafile;
 
+import android.util.Log;
+
+import com.centerm.smartpos.util.HexUtil;
+
+import java.util.Date;
+
 /**
  * Created by wenha_000 on 2017-09-24.
  * 数据缓存区
@@ -7,6 +13,7 @@ package com.myhand.shtcdatafile;
  */
 
 public class DataBuffer {
+    private static final String tag= DataBuffer.class.getSimpleName();
     private byte[] buffer;
     private int header;
     private int tail;
@@ -63,6 +70,7 @@ public class DataBuffer {
         System.arraycopy(data,0,buffer,tail,data.length);
         tail+=data.length;
 
+        Log.d(tag,"data buffer:"+ HexUtil.bytesToHexString(buffer));
         return true;
     }
 
@@ -77,11 +85,13 @@ public class DataBuffer {
         }
 
         int length=0;
-        for (int i=header;i<header+4;i++){
-            length+=length*10+buffer[i]-'0';
-        }
+        String tmpMsg=new String(buffer,header,4);
+        Log.d(tag,"Msg:"+tmpMsg);
+        length=Integer.parseInt(tmpMsg);
+        Log.d(tag,String.format("Frame data length is %d",length));
         if(size()<4+length){
             //未接收到足够的字节
+            Log.d(tag,String.format("size is %d,but data length is %d",size(),length+4));
             return null;
         }
         byte[] result=new byte[length];
@@ -92,6 +102,7 @@ public class DataBuffer {
             header=0;
             tail=0;
         }
+        Log.d(tag,"Frame Data:"+HexUtil.bytesToHexString(result));
         return result;
     }
 

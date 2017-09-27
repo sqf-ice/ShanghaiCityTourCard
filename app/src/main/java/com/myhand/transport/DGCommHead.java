@@ -54,6 +54,24 @@ public class DGCommHead extends DGBase{
         transTime=new Date();
     }
 
+    public DGCommHead(String corpCode,String corpName,String posID,int sendSeq) {
+        fileAbstract=new byte[48];
+        for(int i=0;i<fileAbstract.length;i++)
+        {
+            fileAbstract[i]='0';
+        }
+        transFlag=0;
+        encFlag=0;
+        isCompress=0;
+        tradeCode=32;
+        this.posID=posID;
+        this.corpCode=corpCode;
+        this.sendSeq=sendSeq;
+        reserved="00000000";
+        this.corpName=corpName;
+        transTime=new Date();
+    }
+
     public DGCommHead(byte transFlag, byte encFlag, byte isCompress, byte tradeCode, String posID, String corpCode, int sendSeq,
                       int fileSize, String corpName, Date transTime, String reserved, byte[] fileAbstract) {
         this.transFlag = transFlag;
@@ -193,12 +211,14 @@ public class DGCommHead extends DGBase{
         result+=String.format("%11s",corpCode);
         result+=String.format("%06d",sendSeq);
         result+=String.format("%08d",fileSize);
-        result+=String.format("%16s",corpName);
+        result+=String.format("%-16s",corpName);
 
         DateFormat format=new SimpleDateFormat("yyyyMMddHHmmss");
         result+=format.format(transTime);
         result+=reserved;
-        result+=String.format("%48s","0");
+        for(int i=0;i<48;i++) {
+            result += String.format("%s", "0");
+        }
         return result;
     }
 }

@@ -24,7 +24,6 @@ import java.util.Date;
  */
 
 public class DeviceV8 extends POSDevice {
-
     @Override
     public boolean openPSAMCard() {
         if(getPsamDevice()==null
@@ -40,6 +39,7 @@ public class DeviceV8 extends POSDevice {
         {
             getPsamDevice().setErrorMessage("读取POS号失败:"+getPsamDevice().getErrorMessage());
         }
+        setPosID(psamCard.getPosNo());
 /*
             if(!psamCard.selFile(posDevice.getPsamDevice())){
                 mLogString.add(0,"PSAM卡选择文件失败");
@@ -104,6 +104,7 @@ public class DeviceV8 extends POSDevice {
 
         SHTCPsamCard psamCard=(SHTCPsamCard)psamDevice.getPsamCard();
         CityTourCard currCard=(CityTourCard)userCard;
+
         //PSAM卡送认证码
         Log.d("Debit","认证指令："+psamCard.apduUserCode(readCard().getVerifyCode()));
         byte[] ret=psamDevice.sendAPDU(HexUtil.hexStringToByte(psamCard.apduUserCode(readCard().getVerifyCode())));
@@ -189,7 +190,7 @@ public class DeviceV8 extends POSDevice {
         Log.d("Debit","Result:"+HexUtil.bytesToHexString(ret));
 
         //保存交易
-        DebitRecord debitRecord=new DebitRecord(0,txnAttr,getStationID(),getUser().getUserID(),"0","88",
+        DebitRecord debitRecord=new DebitRecord(p,0,txnAttr,getStationID(),getUser().getUserID(),"0","88",
                 HexUtil.bytesToHexString(posSeq),
                 HexUtil.bytesToHexString(currCard.getFCIValidData().getCityCode()),
                 HexUtil.bytesToHexString(currCard.getFCIValidData().getCardNo()),

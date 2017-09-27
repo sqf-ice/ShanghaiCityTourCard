@@ -15,10 +15,10 @@ public class DebitTxnInCard extends DataBlock{
 
     public void setDebit(String posID,int amount,int balanceAfter,String txnTime)
     {
-        setDataField(0,posID);
-        setDataField(1,String.format("%04x",amount));
-        setDataField(2,String.format("%08x",balanceAfter));
-        setDataField(4,txnTime);
+        setFieldData(0,posID);
+        setFieldData(1,String.format("%04x",amount));
+        setFieldData(2,String.format("%08x",balanceAfter));
+        setFieldData(4,txnTime);
     }
 
 }

@@ -11,17 +11,22 @@ import com.myhand.shanghaicitytourcard.CityTourCard;
  */
 
 public abstract class POSDevice {
-    //
+    //站点代码
     private String stationID="123456";
-    private String posID;
+    //POS编码，来自于PSAM卡
+    private String posID="12345678";
+    //操作用户
     private User user;
+    //数据保存目录
     private String workDataPath;
+    //PSAM卡操作设备
     private PSAMDevice psamDevice;
+    //用户卡（非接）操作设备
     private RFCPUDevice rfcpuDevice;
 
     private String errorMessage;
-
-    private byte[] posSequence;
+    //设备流水号
+    private  int posSequence;
 
     public String getWorkDataPath() {
         return workDataPath;
@@ -54,11 +59,19 @@ public abstract class POSDevice {
         this.user = user;
     }
 
-    public byte[] getPosSequence() {
+    public int getPosSequence() {
         return posSequence;
     }
 
-    public void setPosSequence(byte[] posSequence) {
+    public String getPosID() {
+        return posID;
+    }
+
+    public void setPosID(String posID) {
+        this.posID = posID;
+    }
+
+    public void setPosSequence(int posSequence) {
         this.posSequence = posSequence;
     }
 
@@ -71,24 +84,8 @@ public abstract class POSDevice {
     //用户卡复合消费
     public abstract boolean complexDebit(CPUUserCard userCard,int amount);
     public POSDevice() {
-        posSequence=new byte[4];
-        setPosSequence(0);
+        posSequence=0;
         user=new User("123456","111111");
-
-        //初始化数据目录
-        
-    }
-
-    public void setPosSequence(int seq)
-    {
-        posSequence= Converter.IntToBytes(seq);
-    }
-
-    public byte[] incPosSequence()
-    {
-        byte[] result=posSequence;
-        posSequence=Converter.IntToBytes((int)Converter.BytesToLong(result)+1);
-        return result;
     }
 
     public PSAMDevice getPsamDevice() {

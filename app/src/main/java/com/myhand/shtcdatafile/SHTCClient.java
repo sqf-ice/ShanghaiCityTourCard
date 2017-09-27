@@ -11,8 +11,10 @@ import com.myhand.transport.DGCommHead;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.util.zip.CRC32;
 
 /**
  * Created by wenha_000 on 2017-09-12.
@@ -20,14 +22,21 @@ import java.net.SocketAddress;
 
 public class SHTCClient {
     private static final String tag=SHTCClient.class.getSimpleName();
+
     private String serverIP;
     private int serverPort;
+    private int timeout=30000;
+
     private Socket socket;
     private InputStream readStream;
     private OutputStream writeStream;
 
+    private int status;
+
+
     private Handler handler;
     private DataBuffer rcvBuffer;
+
     public SHTCClient() {
         rcvBuffer=new DataBuffer();
     }
@@ -81,26 +90,20 @@ public class SHTCClient {
     public boolean Connect()
     {
         try {
-            socket = new Socket(serverIP, serverPort);
+            ShowMessage(0,String.format("开始连接服务器(%s@%d)......",serverIP,serverPort));
+            socket = new Socket();
+            SocketAddress socketAddress = new InetSocketAddress(serverIP,serverPort);
+            socket.connect(socketAddress, timeout);
+
             readStream=socket.getInputStream();
             writeStream=socket.getOutputStream();
 
             //开启接收线程
-            //threadReadData.start();
-
-            Bundle data=new Bundle();
-            data.putString("msg","Socket Connect OK!");
-            Message msg=handler.obtainMessage();
-            msg.setData(data);
-            handler.sendMessage(msg);
-            Log.d(tag,"服务器连接成功");
+            threadReadData.start();
+            ShowMessage(0,String.format("服务器成功连接。"));
             return true;
         }catch (IOException ex){
-            Message msg=handler.obtainMessage();
-            Bundle data=new Bundle();
-            data.putString("msg","Connect server exception:"+ex.getLocalizedMessage());
-            msg.setData(data);
-            handler.sendMessage(msg);
+            ShowMessage(1,String.format("服务器连接异常：%s.",ex.getLocalizedMessage()));
             return false;
         }
     }
@@ -110,7 +113,7 @@ public class SHTCClient {
         try {
             if(writeStream==null)
             {
-                ShowMessage("No Connected.");
+                ShowMessage(1,"No Connected.");
                 return;
             }
             String realSendStr=String.format("%04d%s",dataStr.length(),dataStr);
@@ -120,19 +123,21 @@ public class SHTCClient {
             Log.d(tag,"Send Data:"+ HexUtil.bytesToHexString(sendData));
             writeStream.write(sendData, 0, sendData.length);
             Log.d(tag,"Send OK");
-            ShowMessage("数据成功发送");
+            ShowMessage(0,"数据成功发送");
         }catch (Exception ex)
         {
             Log.d(tag,ex.getLocalizedMessage());
-            ShowMessage("Send Data Exception:"+ex.getLocalizedMessage());
+            ShowMessage(1,"Send Data Exception:"+ex.getLocalizedMessage());
         }
     }
 
-    void ShowMessage(String msgStr)
+    void ShowMessage(int errorcode,String msgStr)
     {
         Message msg=handler.obtainMessage();
         Bundle data=new Bundle();
         data.putString("msg",msgStr);
+        msg.setData(data);
+        msg.arg1=errorcode;
         handler.sendMessage(msg);
     }
 
@@ -159,17 +164,45 @@ public class SHTCClient {
                     if(count>0)
                     {
                         Log.d(tag,"Have data read.");
-/*
                         byte[] buffer=new byte[count];
                         readStream.read(buffer,0,count);
+                        Log.d(tag,"Receive data:"+HexUtil.bytesToHexString(buffer));
                         rcvBuffer.putData(buffer);
-*/
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
+                    ShowMessage(1,"Socket receive data exception:"+e.getLocalizedMessage());
+                    break;
                 }
             }
         }
     });
 
+    //CRC32校验
+    public static String CRC(byte[] data)
+    {
+        CRC32  crc32=new CRC32();
+        crc32.update(data);
+        return String.format("%04d",crc32.getValue());
+    }
+
+    public boolean isConnected(){
+        if(socket==null){
+            return false;
+        }
+        return socket.isConnected();
+    }
+
+    public void close(){
+        if(socket==null){
+            return;
+        }
+        try {
+            socket.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            ShowMessage(1,"Socket close exception:"+e.getLocalizedMessage());
+        }
+    }
 }

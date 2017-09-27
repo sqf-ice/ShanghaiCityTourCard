@@ -233,6 +233,7 @@ public class DatabaseSHCT extends AppDatabase{
             record.setTac(cursor.getString(15));
             record.setCardVerNo(cursor.getString(16));
             record.setStatus((byte)cursor.getInt(17));
+
             result.add(record);
         }
 

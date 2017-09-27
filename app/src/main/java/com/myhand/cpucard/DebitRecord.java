@@ -31,6 +31,7 @@ import java.util.List;
 
  */
 public class DebitRecord {
+    private String corpID;
     private long localTxnSeq;
     private byte txnAttr;
     private String stationID;
@@ -53,9 +54,10 @@ public class DebitRecord {
     public DebitRecord() {
     }
 
-    public DebitRecord(long localTxnSeq, byte txnAttr, String stationID, String oprID, String busID,String txnType, String posSeq,
+    public DebitRecord(String corpID,long localTxnSeq, byte txnAttr, String stationID, String oprID, String busID,String txnType, String posSeq,
                        String cityCode, String cardFaceNum, byte cardKind, long balanceBef, long amount, String txnTime,
                        String txnCounter, String posID, String tac, String cardVerNo,byte status) {
+        this.corpID=corpID;
         this.localTxnSeq = localTxnSeq;
         this.txnAttr = txnAttr;
         this.stationID = stationID;
@@ -74,6 +76,14 @@ public class DebitRecord {
         this.tac = tac;
         this.cardVerNo = cardVerNo;
         this.status=status;
+    }
+
+    public String getCorpID() {
+        return corpID;
+    }
+
+    public void setCorpID(String corpID) {
+        this.corpID = corpID;
     }
 
     public byte getStatus() {
