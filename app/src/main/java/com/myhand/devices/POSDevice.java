@@ -6,11 +6,16 @@ import com.myhand.cpucard.PSAMCard;
 import com.myhand.cpucard.SHTCPsamCard;
 import com.myhand.shanghaicitytourcard.CityTourCard;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by wenha_000 on 2017-09-08.
  */
 
 public abstract class POSDevice {
+    //行业代码
+    private byte tradeCode=32;
     //公司代码
     private String corpCode="00320000001";
     //公司名称
@@ -30,7 +35,7 @@ public abstract class POSDevice {
 
     private String errorMessage;
     //交易类型，取决于POS机设备
-    private String txnType="88";
+    private byte txnType=88;
     //设备流水号
     private  int posSequence;
 
@@ -42,15 +47,23 @@ public abstract class POSDevice {
         this.workDataPath = workDataPath;
     }
 
+    public byte getTradeCode() {
+        return tradeCode;
+    }
+
+    public void setTradeCode(byte tradeCode) {
+        this.tradeCode = tradeCode;
+    }
+
     public String getCorpCode() {
         return corpCode;
     }
 
-    public String getTxnType() {
+    public byte getTxnType() {
         return txnType;
     }
 
-    public void setTxnType(String txnType) {
+    public void setTxnType(byte txnType) {
         this.txnType = txnType;
     }
 
@@ -133,5 +146,26 @@ public abstract class POSDevice {
     public void setRfcpuDevice(RFCPUDevice rfcpuDevice) {
         this.rfcpuDevice = rfcpuDevice;
     }
+
+    /**
+     * 文件标识（2位）+日期（6位）+ 行业代码（2）+ 营运单位代码（11）+ 序列号（3位）+来源标志（1）
+     * @param type
+     * @return
+     */
+    public String makeFHFileName(int sequence,char type){
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyMMdd");
+        String result=String.format("FH%s%02d%s%03d%c",simpleDateFormat.format(new Date()),
+                tradeCode,posID,sequence,type);
+
+        return result;
+    }
+    /**
+     * 形成消费记录文件
+     * @return
+     */
+    public boolean makeFHFile(){
+        return false;
+    }
+
 
 }

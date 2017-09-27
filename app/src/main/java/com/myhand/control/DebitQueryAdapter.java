@@ -61,10 +61,16 @@ public class DebitQueryAdapter extends BaseAdapter {
     static class ViewHolder
     {
         public TextView textViewLocalSeg;
+
         public TextView textViewCardNo;
+        public TextView textViewCardCounter;
+
+        public TextView textViewPosID;
+        public TextView textViewPosSeq;
+
         public TextView textViewBalanceBef;
         public TextView textViewAmount;
-        public TextView textViewCardCounter;
+
         public TextView textViewTxnTime;
         public TextView textViewStatus;
     }
@@ -78,6 +84,10 @@ public class DebitQueryAdapter extends BaseAdapter {
             convertView = mInflater.inflate(R.layout.item_debitquery, null);
             holder.textViewLocalSeg = (TextView) convertView.findViewById(R.id.textViewLocalSeq);
             holder.textViewCardNo = (TextView)convertView.findViewById(R.id.textViewFaceNo);
+
+            holder.textViewPosID=(TextView)convertView.findViewById(R.id.textViewPosID);
+            holder.textViewPosSeq=(TextView) convertView.findViewById(R.id.textViewPosSeq);
+
             holder.textViewBalanceBef = (TextView)convertView.findViewById(R.id.textViewBalanceBef);
             holder.textViewAmount = (TextView)convertView.findViewById(R.id.textViewAmount);
             holder.textViewCardCounter=(TextView)convertView.findViewById(R.id.textViewCardCounter) ;
@@ -92,6 +102,10 @@ public class DebitQueryAdapter extends BaseAdapter {
         DebitRecord record=listDebit.get(position);
         holder.textViewLocalSeg.setText(String.format("本地流水：%d",record.getLocalTxnSeq()));
         holder.textViewCardNo.setText("卡号："+record.getCardFaceNum());
+
+        holder.textViewPosID.setText("Pos机号:"+record.getPosID());
+        holder.textViewPosSeq.setText(String.format("POS流水号：%s",record.getPosSeq()));
+
         holder.textViewBalanceBef.setText(String.format("消费前金额：%d",record.getBalanceBef()));
         holder.textViewAmount.setText(String.format("消费金额:%d",record.getAmount()));
         holder.textViewCardCounter.setText(String.format("卡计数器:%s",record.getTxnCounter()));

@@ -108,7 +108,18 @@ public class CityCardQueryActivity extends BaseTourCardActivity {
         btnDebit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!posDevice.debit(card,1))
+                //检查消费金额
+                String txtAmount=editTextAmount.getText().toString();
+                if(txtAmount.isEmpty()){
+                    editTextAmount.setHint("请输入消费金额");
+                    return;
+                }
+                int debitAmount=Integer.parseInt(txtAmount);
+                if(debitAmount<=0){
+                    editTextAmount.setHint("请输入正确的金额");
+                    return;
+                }
+                if(!posDevice.debit(card,debitAmount))
                 {
                     mLogString.add(0,posDevice.getErrorMessage());
                 }else{

@@ -37,26 +37,26 @@ public class DebitRecord {
     private String stationID;
     private String oprID;
     private String busID;
-    private String txnType;
-    private String posSeq;
+    private byte txnType;
+    private int posSeq;
     private String cityCode;
     private String cardFaceNum;
     private byte cardKind;
     private long balanceBef;
     private long amount;
     private String txnTime;
-    private String txnCounter;
+    private int txnCounter;
     private String posID;
     private String tac;
-    private String cardVerNo;
+    private byte cardVerNo;
     private byte status;
 
     public DebitRecord() {
     }
 
-    public DebitRecord(String corpID,long localTxnSeq, byte txnAttr, String stationID, String oprID, String busID,String txnType, String posSeq,
+    public DebitRecord(String corpID,long localTxnSeq, byte txnAttr, String stationID, String oprID, String busID,byte txnType, int posSeq,
                        String cityCode, String cardFaceNum, byte cardKind, long balanceBef, long amount, String txnTime,
-                       String txnCounter, String posID, String tac, String cardVerNo,byte status) {
+                       int txnCounter, String posID, String tac, byte cardVerNo,byte status) {
         this.corpID=corpID;
         this.localTxnSeq = localTxnSeq;
         this.txnAttr = txnAttr;
@@ -90,11 +90,11 @@ public class DebitRecord {
         return status;
     }
 
-    public String getTxnType() {
+    public byte getTxnType() {
         return txnType;
     }
 
-    public void setTxnType(String txnType) {
+    public void setTxnType(byte txnType) {
         this.txnType = txnType;
     }
 
@@ -142,11 +142,11 @@ public class DebitRecord {
         this.busID = busID;
     }
 
-    public String getPosSeq() {
+    public int getPosSeq() {
         return posSeq;
     }
 
-    public void setPosSeq(String posSeq) {
+    public void setPosSeq(int posSeq) {
         this.posSeq = posSeq;
     }
 
@@ -198,11 +198,11 @@ public class DebitRecord {
         this.txnTime = txnTime;
     }
 
-    public String getTxnCounter() {
+    public int getTxnCounter() {
         return txnCounter;
     }
 
-    public void setTxnCounter(String txnCounter) {
+    public void setTxnCounter(int txnCounter) {
         this.txnCounter = txnCounter;
     }
 
@@ -222,19 +222,19 @@ public class DebitRecord {
         this.tac = tac;
     }
 
-    public String getCardVerNo() {
+    public byte getCardVerNo() {
         return cardVerNo;
     }
 
-    public void setCardVerNo(String cardVerNo) {
+    public void setCardVerNo(byte cardVerNo) {
         this.cardVerNo = cardVerNo;
     }
 
     public FHFileRecord toFHFileRecord(String unitCode)
     {
-        FHFileRecord result=new FHFileRecord(unitCode,localTxnSeq,stationID,String.format("%02x",txnAttr),
-                Integer.parseInt(posSeq,0x10),cityCode,cardFaceNum,String.format("%02x",cardKind),
-                balanceBef,amount,txnTime,Integer.parseInt(txnCounter,0x10),posID,tac,Integer.parseInt(cardVerNo,0x10));
+        FHFileRecord result=new FHFileRecord(unitCode,localTxnSeq,stationID,txnAttr,
+                posSeq,cityCode,cardFaceNum,cardKind,
+                balanceBef,amount,txnTime,txnCounter,posID,tac,cardVerNo);
         return result;
     }
 }

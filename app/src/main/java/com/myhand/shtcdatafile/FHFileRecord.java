@@ -1,5 +1,7 @@
 package com.myhand.shtcdatafile;
 
+import android.util.Log;
+
 import com.myhand.cpucard.DebitRecord;
 
 /**
@@ -8,14 +10,19 @@ import com.myhand.cpucard.DebitRecord;
 
 public class FHFileRecord extends FileRecord {
     public FHFileRecord() {
-        setFieldsLength(new byte[]{11,8,2,6,16,6,6,2,12,4,12,2,8,8,8,6,6,8,8,2,0});
+        setFieldsLength(new byte[]{11,8,2,6,16,6,2,12,4,12,2,8,8,14,6,8,8,2,0});
         int length=getDataFieldLength();
-        setData(new String(new byte[length]));
+
+        String data="";
+        for(int i=0;i<length;i++){
+            data+="0";
+        }
+        setData(data);
     }
 
-    public FHFileRecord(String unitCode, long localSeq, String stationID, String txnType, long posSeq, String cityCode,
-                        String cardFaceNum, String cardType, long balBef, long amount, String txnTime, int cardTxnCounter,
-                        String posID, String tac, int cardVer) {
+    public FHFileRecord(String unitCode, long localSeq, String stationID, byte txnType, long posSeq, String cityCode,
+                        String cardFaceNum, byte cardType, long balBef, long amount, String txnTime, int cardTxnCounter,
+                        String posID, String tac, byte cardVer) {
         /**
          File Record Area（N）
          CorpId	N11	营运单位代码
@@ -40,7 +47,7 @@ public class FHFileRecord extends FileRecord {
          TradSpec	ANSVAR	行业特有数据	依据IsTSUsed而决定有无该域
          RtnSign	S1	回车符	’\n’
          */
-        setFieldsLength(new byte[]{11,8,2,6,16,6,6,2,12,4,12,2,8,8,8,6,6,8,8,2,0});
+        setFieldsLength(new byte[]{11,8,2,6,16,6,2,12,4,12,2,8,8,14,6,8,8,2,0});
         setData(String.format("%- 11s%08d00%06s%016s%06s%s%012d%s%s%s%08d%08d%s%06d%08s%08s%02d\n",
                 unitCode,localSeq,"0","0","1",txnType,posSeq,cityCode,cardFaceNum,cardType,balBef,amount,txnTime,cardTxnCounter,
                 posID,tac,cardVer));
@@ -48,23 +55,41 @@ public class FHFileRecord extends FileRecord {
 
     public void fromDebitRecord(DebitRecord record){
         setFieldData(0,record.getCorpID());
+        Log.d("from",getData());
         setFieldData(1,(int)record.getLocalTxnSeq());
+        Log.d("from",getData());
         setFieldData(2,record.getTxnAttr());
+        Log.d("from",getData());
         setFieldData(3,record.getStationID());
+        Log.d("from",getData());
         setFieldData(4,record.getOprID());
+        Log.d("from",getData());
         setFieldData(5,record.getBusID());
+        Log.d("from",getData());
         setFieldData(6,record.getTxnType());
+        Log.d("from",getData());
         setFieldData(7,record.getPosSeq());
+        Log.d("from",getData());
         setFieldData(8,record.getCityCode());
+        Log.d("from",getData());
         setFieldData(9,record.getCardFaceNum());
+        Log.d("from",getData());
         setFieldData(10,record.getCardKind());
+        Log.d("from",getData());
         setFieldData(11,(int)record.getBalanceBef());
+        Log.d("from",getData());
         setFieldData(12,(int)record.getAmount());
+        Log.d("from",getData());
         setFieldData(13,record.getTxnTime());
+        Log.d("from",getData());
         setFieldData(14,record.getPosID());
+        Log.d("from",getData());
         setFieldData(15,record.getPosID());
+        Log.d("from",getData());
         setFieldData(16,record.getTac());
+        Log.d("from",getData());
         setFieldData(17,record.getCardVerNo());
+        Log.d("from",getData());
     }
 
     public DebitRecord toDebitRecord(){

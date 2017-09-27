@@ -78,12 +78,7 @@ public class SendDataActivity extends AppCompatActivity {
         btnSendData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            long sendSeq=((POSApplication)getApplication()).getAppDatabase().getPosSendSequence("12345") ;
-            DGCommHead head=new DGCommHead();
-                head.setSendSeq((int)sendSeq);
-            String sendStr=head.toString();
-            Log.d(tag,"DG:"+sendStr+String.format(" Length:%d",sendStr.length()));
-            client.SendStringData(sendStr);
+                new Thread(client.runnableSendDebitRecord).start();
             }
         });
 
@@ -176,7 +171,7 @@ public class SendDataActivity extends AppCompatActivity {
 //                progressDialog.hide();
                 return;
             }
-            new Thread(runnableReceive).start();
+//            new Thread(runnableReceive).start();
             //ShowMessage("服务器连接成功。");
         }
     };
@@ -184,6 +179,7 @@ public class SendDataActivity extends AppCompatActivity {
     /**
      * 接收数据
      */
+/*
     Runnable runnableReceive=new Runnable() {
         @Override
         public void run() {
@@ -203,6 +199,7 @@ public class SendDataActivity extends AppCompatActivity {
             }
         }
     };
+*/
 
      public void ShowMessage(String msgTxt){
         Message msg=mHandler.obtainMessage();

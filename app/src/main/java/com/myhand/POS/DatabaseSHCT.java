@@ -9,8 +9,11 @@ import android.util.Log;
 import com.centerm.smartpos.util.HexUtil;
 import com.myhand.common.AppDatabase;
 import com.myhand.cpucard.DebitRecord;
+import com.myhand.shtcdatafile.FHFileUploadInfo;
 
 import java.sql.SQLData;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +28,16 @@ public class DatabaseSHCT extends AppDatabase{
     private String tbBlkCard="TBBlackCard";
     private String TBDebit="TBDebit";
 
+    /**
+     * 消费文件注册信息表
+     */
+    private String TBFHFileRegist="TBFHFileRegist";
+    private String SQLCreateTBFHFileRegist=String.format("Create Table %s(\n"
+            +"FileName varchar(30) not null primary key,"
+            +"CreateTime date not null default now,"
+            +"UploadTimes decimal(4) not null default 0,"
+            +"LastUploadTime date)",TBFHFileRegist);
+
     public DatabaseSHCT(Context context, String databaseName, int version) {
         super(context, databaseName, version);
         // TODO Auto-generated constructor stub
@@ -34,22 +47,23 @@ public class DatabaseSHCT extends AppDatabase{
     public String sqlInsertDebit(DebitRecord debitRecord)
     {
         String result="Insert into TBDebit values(null,"
-                +String.format("'%02x',",debitRecord.getTxnAttr())
+                +String.format("'%s',",debitRecord.getCorpID())
+                +String.format("%d,",debitRecord.getTxnAttr())
                 +String.format("'%s',",debitRecord.getStationID())
                 +String.format("'%s',",debitRecord.getOprID())
-                +String.format("'%s',","0")
-                +String.format("'%s',","89")
+                +String.format("'%s',",debitRecord.getBusID())
+                +String.format("%d,",debitRecord.getTxnType())
                 +String.format("'%s',",debitRecord.getPosSeq())
                 +String.format("'%s',",debitRecord.getCityCode())
                 +String.format("'%s',",debitRecord.getCardFaceNum())
-                +String.format("'%02x',",debitRecord.getCardKind())
+                +String.format("%02d,",debitRecord.getCardKind())
                 +String.format("%d,",debitRecord.getBalanceBef())
                 +String.format("%d,",debitRecord.getAmount())
                 +String.format("'%s',",debitRecord.getTxnTime())
-                +String.format("'%s',",debitRecord.getTxnCounter())
+                +String.format("%d,",debitRecord.getTxnCounter())
                 +String.format("'%s',",debitRecord.getPosID())
                 +String.format("'%s',",debitRecord.getTac())
-                +String.format("'%s',0)",debitRecord.getCardVerNo());
+                +String.format("%d,0)",debitRecord.getCardVerNo());
         return result;
     }
 
@@ -152,24 +166,30 @@ public class DatabaseSHCT extends AppDatabase{
      CardVerNo	N2	卡内版本号	当作地域区分标志
      */
     private static final  String SQLCreateTableDEBIT="Create Table TBDebit(id integer primary key autoincrement,"
-            +"txnAttr varchar(2) not null,"
+            +"corpID varchar(11) not null,"
+            +"txnAttr decimal(3) not null,"
             +"stationID varchar(6) not null,"
             +"posOprID varchar(16) not null,"
             +"posCarrID varchar(6) not null,"
-            +"txnType varchar(2) not null,"
-            +"posSeq varchar(12) not null,"
+            +"txnType decimal(3) not null,"
+            +"posSeq decimal(12) not null,"
             +"cityCode varchar(4) not null,"
             +"CardFaceNum varchar(12) not null,"
-            +"CardKind varchar(2) not null,"
+            +"CardKind decimal(3) not null,"
             +"BalanceBef decimal(8) not null,"
             +"TxnAmt decimal(8) not null,"
             +"TxnTime varchar(14) not null,"
-            +"TxnCounter varchar(6) not null,"
+            +"TxnCounter decimal(6) not null,"
             +"PosID varchar(8) not null,"
             +"TAC varchar(8) not null,"
-            +"CardVerNo varchar(2) not null,"
+            +"CardVerNo decimal(2) not null,"
             +"Status decimal(2) not null default 0)";
 
+    /**
+     * 添加黑卡记录
+     * @param cardNo
+     * @return
+     */
     public boolean insertBlkCard(String cardNo)
     {
         String sqlInsert=String.format("Insert into TBBlackCard(CardNo) values('%s')",cardNo);
@@ -182,6 +202,11 @@ public class DatabaseSHCT extends AppDatabase{
         return true;
     }
 
+    /**
+     * 判断是否为黑卡
+     * @param cardNo
+     * @return
+     */
     public boolean isBlackCard(String cardNo)
     {
         String sqlSelect=String.format("Select * from %s where CardNo='%s'",tbBlkCard,cardNo);
@@ -194,6 +219,11 @@ public class DatabaseSHCT extends AppDatabase{
         return true;
     }
 
+    /**
+     * 保存消费记录
+     * @param debitRecord
+     * @return
+     */
     public boolean saveDebit(DebitRecord debitRecord)
     {
         String sqlInsert=sqlInsertDebit(debitRecord);
@@ -201,6 +231,7 @@ public class DatabaseSHCT extends AppDatabase{
         return ExecCommand(sqlInsert);
     }
 
+    //查询消费记录
     public List<DebitRecord> debitQuery(String condition)
     {
         List<DebitRecord> result=new ArrayList<DebitRecord>();
@@ -216,27 +247,95 @@ public class DatabaseSHCT extends AppDatabase{
             DebitRecord record=new DebitRecord();
 
             record.setLocalTxnSeq(cursor.getLong(0));
-            record.setTxnAttr((byte)Integer.parseInt(cursor.getString(1)));
-            record.setStationID(cursor.getString(2));
-            record.setOprID(cursor.getString(3));
-            record.setBusID(cursor.getString(4));
-            record.setTxnType(cursor.getString(5));
-            record.setPosSeq(cursor.getString(6));
-            record.setCityCode(cursor.getString(7));
-            record.setCardFaceNum(cursor.getString(8));
-            record.setCardKind((byte)Integer.parseInt(cursor.getString(9),0x10));
-            record.setBalanceBef(cursor.getLong(10));
-            record.setAmount(cursor.getLong(11));
-            record.setTxnTime(cursor.getString(12));
-            record.setTxnCounter(cursor.getString(13));
-            record.setPosID(cursor.getString(14));
-            record.setTac(cursor.getString(15));
-            record.setCardVerNo(cursor.getString(16));
-            record.setStatus((byte)cursor.getInt(17));
+            record.setCorpID(cursor.getString(1));
+            record.setTxnAttr((byte)cursor.getInt(2));
+            record.setStationID(cursor.getString(3));
+            record.setOprID(cursor.getString(4));
+            record.setBusID(cursor.getString(5));
+            record.setTxnType((byte)cursor.getInt(6));
+            record.setPosSeq(cursor.getInt(7));
+            record.setCityCode(cursor.getString(8));
+            record.setCardFaceNum(cursor.getString(9));
+            record.setCardKind((byte)cursor.getInt(10));
+            record.setBalanceBef(cursor.getLong(11));
+            record.setAmount(cursor.getLong(12));
+            record.setTxnTime(cursor.getString(13));
+            record.setTxnCounter((byte)cursor.getInt(14));
+            record.setPosID(cursor.getString(15));
+            record.setTac(cursor.getString(16));
+            record.setCardVerNo((byte)cursor.getInt(17));
+            record.setStatus((byte)cursor.getInt(18));
 
             result.add(record);
         }
 
         return  result;
+    }
+    /**
+     * 更新消费记录状态
+     * @param localSeq
+     * @param status
+     * @return
+     */
+    public boolean updateRecordStatus(long localSeq,int status){
+        String sqlUpdate=String.format("Update %s set status=%d where id=%d",
+                TBDebit,status,localSeq);
+
+        return ExecCommand(sqlUpdate);
+    }
+
+    /**
+     * 注册消费文件
+     * @param filename
+     * @return
+     */
+    public boolean registFHFile(String filename){
+        String sqlInsert=String.format("Insert into %s(FileName) values('%s')",TBFHFileRegist,filename);
+
+        return ExecCommand(sqlInsert);
+    }
+
+    /**
+     * 更新消费文件上传记录
+     * @param filename
+     * @return
+     */
+    public boolean uploadFHFileRegist(String filename){
+        String sqlUpdate=String.format("Update %s set uploadTimes=uploadTimes+1 where FileName='%s'",TBFHFileRegist,filename);
+
+        return ExecCommand(sqlUpdate);
+    }
+
+    /**
+     * 查询指定条件的消费文件上传信息
+     * @param condition
+     * @return
+     */
+    public List<FHFileUploadInfo> getFHFileList(String condition){
+        String sqlSelect=String.format("Select * from %s\n",TBFHFileRegist);
+        if(condition!=null&&!condition.isEmpty()){
+            sqlSelect+=condition;
+        }
+
+        Cursor cursor=ExecQuery(sqlSelect);
+        List<FHFileUploadInfo> result=new ArrayList<FHFileUploadInfo>();
+        while(cursor.moveToNext()){
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            FHFileUploadInfo fhFileUploadInfo= null;
+            try {
+                fhFileUploadInfo = new FHFileUploadInfo(cursor.getString(0),
+                        sdf.parse(cursor.getString(1)),
+                        cursor.getInt(2),
+                        sdf.parse(cursor.getString(3)));
+            } catch (ParseException e) {
+                e.printStackTrace();
+                Log.d(tag,e.getLocalizedMessage());
+                return result;
+            }
+
+            result.add(fhFileUploadInfo);
+        }
+
+        return result;
     }
 }

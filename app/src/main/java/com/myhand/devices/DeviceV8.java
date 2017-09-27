@@ -197,13 +197,14 @@ public class DeviceV8 extends POSDevice {
                 getUser().getUserID(),
                 "0",//无公交车编号
                 getTxnType(),
-                HexUtil.bytesToHexString(posSeq),
+                (int)Converter.BytesToLong(posSeq),
                 HexUtil.bytesToHexString(currCard.getFCIValidData().getCityCode()),
                 HexUtil.bytesToHexString(currCard.getFCIValidData().getCardNo()),
                 currCard.getFCIValidData().getCardType(),Converter.BytesToLong(balanceBef),
-                amount,dateString,HexUtil.bytesToHexString(cardCounter),psamCard.getPosNo(),
+                amount,dateString,
+                (int)Converter.BytesToLong(cardCounter),psamCard.getPosNo(),
                 HexUtil.bytesToHexString(tac),
-                psamCard.getKeyVersion(),//卡内版本号
+                (byte)Integer.parseInt(psamCard.getKeyVersion(),0x10),//卡内版本号
                 (byte)0);
 
         DatabaseSHCT db=POSApplication.getPOSApplication().getAppDatabase();
