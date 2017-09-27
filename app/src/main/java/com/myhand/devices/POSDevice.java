@@ -29,6 +29,8 @@ public abstract class POSDevice {
     private RFCPUDevice rfcpuDevice;
 
     private String errorMessage;
+    //交易类型，取决于POS机设备
+    private String txnType="88";
     //设备流水号
     private  int posSequence;
 
@@ -42,6 +44,14 @@ public abstract class POSDevice {
 
     public String getCorpCode() {
         return corpCode;
+    }
+
+    public String getTxnType() {
+        return txnType;
+    }
+
+    public void setTxnType(String txnType) {
+        this.txnType = txnType;
     }
 
     public void setCorpCode(String corpCode) {

@@ -10,6 +10,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +41,8 @@ public class CityCardQueryActivity extends BaseTourCardActivity {
     private AidlPsam psam3 = null;
 
     private CityTourCard card=null;
+    //消费相关
+    private EditText editTextAmount;
 
     //卡信息显示控件
     private TextView mCardATR;
@@ -72,10 +75,22 @@ public class CityCardQueryActivity extends BaseTourCardActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         initControls();
+        initDebit();
+    }
+
+    public void initDebit(){
+        Bundle data=getIntent().getExtras();
+        if(data!=null){
+            editTextAmount.setText(String.format("%d",data.getInt("amount")));
+        }else{
+            editTextAmount.setText("1");
+        }
     }
 
     public void initControls()
     {
+        editTextAmount=(EditText)findViewById(R.id.editTextAmount);
+
         //日志列表
         mLogListView=(ListView)findViewById(R.id.listViewLog) ;
         mLogString=new ArrayList<String>();

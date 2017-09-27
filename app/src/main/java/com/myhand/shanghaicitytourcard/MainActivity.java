@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
         System.loadLibrary("native-lib");
     }
 
+    private int amount=2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,9 +73,7 @@ public class MainActivity extends AppCompatActivity {
         btnCardQuery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent();
-                intent.setClass(MainActivity.this,CityCardQueryActivity.class);
-                startActivityForResult(intent,CardQuery);
+                startDebit();
             }
         });
 
@@ -106,6 +106,24 @@ public class MainActivity extends AppCompatActivity {
         {
             Log.d(tag,"Black Card Find Failure");
         }
+
+        //检查是否进入消费界面
+        Bundle data=getIntent().getExtras();
+        if(data!=null){
+            amount=data.getInt("amount");
+            startDebit();
+        }
+    }
+
+    public void startDebit()
+    {
+        Intent intent=new Intent();
+        intent.setClass(MainActivity.this,CityCardQueryActivity.class);
+        Bundle data=new Bundle();
+        data.putInt("amount",amount);
+        intent.putExtras(data);
+
+        startActivityForResult(intent,CardQuery);
     }
 
     @Override

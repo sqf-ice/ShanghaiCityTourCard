@@ -190,13 +190,21 @@ public class DeviceV8 extends POSDevice {
         Log.d("Debit","Result:"+HexUtil.bytesToHexString(ret));
 
         //保存交易
-        DebitRecord debitRecord=new DebitRecord(getCorpCode(),0,txnAttr,getStationID(),getUser().getUserID(),"0","88",
+        DebitRecord debitRecord=new DebitRecord(getCorpCode(),
+                0,
+                txnAttr,
+                getStationID(),
+                getUser().getUserID(),
+                "0",//无公交车编号
+                getTxnType(),
                 HexUtil.bytesToHexString(posSeq),
                 HexUtil.bytesToHexString(currCard.getFCIValidData().getCityCode()),
                 HexUtil.bytesToHexString(currCard.getFCIValidData().getCardNo()),
                 currCard.getFCIValidData().getCardType(),Converter.BytesToLong(balanceBef),
                 amount,dateString,HexUtil.bytesToHexString(cardCounter),psamCard.getPosNo(),
-                HexUtil.bytesToHexString(tac),"01",(byte)0);
+                HexUtil.bytesToHexString(tac),
+                psamCard.getKeyVersion(),//卡内版本号
+                (byte)0);
 
         DatabaseSHCT db=POSApplication.getPOSApplication().getAppDatabase();
         if(!db.saveDebit(debitRecord))
@@ -282,12 +290,14 @@ public class DeviceV8 extends POSDevice {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         String dateString = formatter.format(date);
         Log.d(tag,"交易日期："+dateString);
-        byte[] posSeq=incPosSequence();
+        int posSeq=getPosSequence();
+        setPosSequence(posSeq++);
+
         String apduPsamCardBegin="8070000128"+HexUtil.bytesToHexString(rand)
                 +HexUtil.bytesToHexString(cardSeq)
                 +HexUtil.bytesToHexString(Converter.IntToBytes(amount))
                 +"09"+ dateString+HexUtil.bytesToHexString(alg)
-                +HexUtil.bytesToHexString(posSeq)
+                +Converter.IntToBytes(posSeq)
                 +HexUtil.bytesToHexString(((CityTourCard)userCard).getFCIValidData().getCardNo())
                 +"2000"+"FF0000000000";
         ret=getPsamDevice().sendAPDU(HexUtil.hexStringToByte(apduPsamCardBegin));
@@ -315,7 +325,7 @@ public class DeviceV8 extends POSDevice {
         Log.d(tag,"用户卡更新复合消费缓存 apdu:"+apduUserCardUpdateCache+" Result:"+HexUtil.bytesToHexString(ret));
 
         //用户卡交易完成
-        String apduUserCardEnd="805401000F"+HexUtil.bytesToHexString(posSeq)
+        String apduUserCardEnd="805401000F"+HexUtil.bytesToHexString(Converter.IntToBytes(posSeq))
                 +dateString+HexUtil.bytesToHexString(mac1);
         ret=getRfcpuDevice().sendAPDU(HexUtil.hexStringToByte(apduUserCardEnd));
         Log.d(tag,"用户卡交易完成 apdu:"+apduUserCardEnd+" Result:"+HexUtil.bytesToHexString(ret));
