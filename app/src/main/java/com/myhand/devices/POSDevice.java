@@ -11,6 +11,10 @@ import com.myhand.shanghaicitytourcard.CityTourCard;
  */
 
 public abstract class POSDevice {
+    //公司代码
+    private String corpCode="00320000001";
+    //公司名称
+    private String corpName="SHANDE";
     //站点代码
     private String stationID="123456";
     //POS编码，来自于PSAM卡
@@ -34,6 +38,22 @@ public abstract class POSDevice {
 
     public void setWorkDataPath(String workDataPath) {
         this.workDataPath = workDataPath;
+    }
+
+    public String getCorpCode() {
+        return corpCode;
+    }
+
+    public void setCorpCode(String corpCode) {
+        this.corpCode = corpCode;
+    }
+
+    public String getCorpName() {
+        return corpName;
+    }
+
+    public void setCorpName(String corpName) {
+        this.corpName = corpName;
     }
 
     public String getErrorMessage() {

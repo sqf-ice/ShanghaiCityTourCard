@@ -190,7 +190,7 @@ public class DeviceV8 extends POSDevice {
         Log.d("Debit","Result:"+HexUtil.bytesToHexString(ret));
 
         //保存交易
-        DebitRecord debitRecord=new DebitRecord(p,0,txnAttr,getStationID(),getUser().getUserID(),"0","88",
+        DebitRecord debitRecord=new DebitRecord(getCorpCode(),0,txnAttr,getStationID(),getUser().getUserID(),"0","88",
                 HexUtil.bytesToHexString(posSeq),
                 HexUtil.bytesToHexString(currCard.getFCIValidData().getCityCode()),
                 HexUtil.bytesToHexString(currCard.getFCIValidData().getCardNo()),
