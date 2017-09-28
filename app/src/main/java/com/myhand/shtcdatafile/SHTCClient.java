@@ -352,7 +352,7 @@ public class SHTCClient {
     private boolean sendDebitRecord(DebitRecord record){
         FHFileRecord fileRecord=new FHFileRecord();
         Log.d(tag,String.format("记录长度：%d",fileRecord.getDataFieldLength()));
-        fileRecord.fromDebitRecord(record);
+        //fileRecord.fromDebitRecord(record);
         String dataStr=fileRecord.getData();
         Log.d(tag,"记录数据："+dataStr);
         ShowMessage(0,dataStr);
@@ -362,6 +362,7 @@ public class SHTCClient {
         Log.d(tag,"发送数据："+sendData);
         ShowMessage(0,sendData);
         transStatus=TRANS_STATUS_SENDRECORD;
+        SendStringData(sendData);
         wailtCount=300;
         while (transStatus!=TRANS_STATUS_SENDRECORDOK&&wailtCount>=0){
             try {

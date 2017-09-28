@@ -15,7 +15,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.myhand.POS.DatabaseSHCT;
+import com.myhand.cpucard.DebitRecord;
 import com.myhand.devices.DataExchangeService;
+import com.myhand.shtcdatafile.FHFileRecord;
+import com.myhand.shtcdatafile.SHTCClient;
 
 public class MainActivity extends AppCompatActivity {
     private String tag=MainActivity.class.getSimpleName();
@@ -113,6 +116,22 @@ public class MainActivity extends AppCompatActivity {
             amount=data.getInt("amount");
             startDebit();
         }
+
+        testRecord();
+    }
+
+    private void testRecord(){
+        DebitRecord record=new DebitRecord("00320000001",1,(byte)80,"123456","100001","1234",
+                (byte)88,1,"2000","12",(byte)1,100,1,"20170928092400",1,"10001000","01020304",(byte)1,(byte)0);
+
+        FHFileRecord fhFileRecord=new FHFileRecord();
+        fhFileRecord.fromDebitRecord(record);
+
+        Log.d(tag,fhFileRecord.getData());
+
+        String crcStr=SHTCClient.CRC(fhFileRecord.getData().getBytes());
+        String dgStr=String.format("%04d%s%s",fhFileRecord.getData().length()+8,fhFileRecord.getData(),crcStr);
+        Log.d(tag,String.format("DG Str:%s Length:%d",dgStr,dgStr.length()));
     }
 
     public void startDebit()

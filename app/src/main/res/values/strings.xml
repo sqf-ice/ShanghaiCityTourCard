@@ -35,8 +35,50 @@
     <string name="psam_close_failed">关闭PSAM卡设备失败</string>
 
     <string name="psam_close_exception">关闭PSAM卡设备异常</string>
-    <string name="title_activity_send_data">SendDataActivity</string>
+    <string name="title_activity_send_data">数据发送</string>
     <string name="title_activity_debit_query">消费记录查询</string>
     <string name="title_activity_login">用户登录</string>
+
+    <!-- PrinterActivity -->
+    <string name="printer_finish">打印数据完成</string>
+    <string name="printer_need_paper">打印机缺纸，请装纸后重试</string>
+    <string name="printer_gray1">设置打印机灰度为1级</string>
+    <string name="printer_gray1_success">打印机灰度设置为1级成功</string>
+    <string name="printer_gray_exception">设置打印机灰度发生异常</string>
+    <string name="printer_gray2">设置打印机灰度为2级</string>
+    <string name="printer_gray2_success">打印机灰度设置为2级成功</string>
+    <string name="printer_gray3">设置打印机灰度为3级</string>
+    <string name="printer_gray3_success">打印机灰度设置为3级成功</string>
+    <string name="printer_gray4">设置打印机灰度为4级</string>
+    <string name="printer_gray4_success">打印机灰度设置为4级成功</string>
+    <string name="printer_textsize_bigger">字体变大测试数据</string>
+    <string name="printer_textsize_blod">加粗打印测试数据</string>
+    <string name="printer_left">居左打印测试数据</string>
+    <string name="printer_center">居中打印测试数据</string>
+    <string name="printer_right">居右打印测试数据</string>
+    <string name="printer_underline">下划线测试数据</string>
+    <string name="printer_amount">金额：</string>
+    <string name="printer_newline">换行测试数据</string>
+    <string name="printer_acceptorid_name">商户名称测试数据</string>
+    <string name="printer_line_distance">行间距和字符间距内容调整</string>
+    <string name="printer_left_distance">左边距</string>
+    <string name="printer_device_busy">打印机设备忙</string>
+    <string name="printer_success">打印成功</string>
+    <string name="printer_lack_paper">打印机缺纸</string>
+    <string name="printer_over_heigh">打印机过热</string>
+    <string name="printer_over_heat">打印机高温</string>
+    <string name="printer_low_power">打印机低电量</string>
+    <string name="printer_other_exception_code">其他异常，异常码：</string>
+    <string name="printer_spit_success">打印机走纸成功</string>
+    <string name="printer_spit_exception">设打印机走纸异常：</string>
+    <string name="printer_status_exception">获取打印机状态异常</string>
+    <string name="printer_init_success">初始化打印参数成功</string>
+    <string name="printer_init_exception">初始化打印机参数失败</string>
+    <string name="printer_textsize_normal">这是正常字体</string>
+    <string name="printer_textsize_small">这是小字体</string>
+    <string name="printer_texisize_higher">这是倍高</string>
+    <string name="printer_textsize_wider">这是倍宽</string>
+    <string name="printer_higher_wider">这是倍高宽</string>
+
 
 </resources>

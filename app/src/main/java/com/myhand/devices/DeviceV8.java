@@ -93,13 +93,13 @@ public class DeviceV8 extends POSDevice {
     }
 
     @Override
-    public boolean debit(CPUUserCard userCard, int amount)
+    public DebitRecord debit(CPUUserCard userCard, int amount)
     {
         String tag="Debit";
         V8PsamDevice psamDevice=(V8PsamDevice)getPsamDevice();
         if(!openPSAMCard())
         {
-            return false;
+            return null;
         }
 
         SHTCPsamCard psamCard=(SHTCPsamCard)psamDevice.getPsamCard();
@@ -110,7 +110,7 @@ public class DeviceV8 extends POSDevice {
         byte[] ret=psamDevice.sendAPDU(HexUtil.hexStringToByte(psamCard.apduUserCode(readCard().getVerifyCode())));
         if(ret==null)
         {
-            return false;
+            return null;
         }else{
             Log.e("Debit","Ret:"+HexUtil.bytesToHexString(ret));
         }
@@ -123,7 +123,7 @@ public class DeviceV8 extends POSDevice {
         if(ret==null||ret.length<15)
         {
             setErrorMessage("用户卡开始交易失败："+HexUtil.bytesToHexString(ret));
-            return false;
+            return null;
         }
         Log.d("Debit","结果："+HexUtil.bytesToHexString(ret));
         //解析卡结果
@@ -159,7 +159,7 @@ public class DeviceV8 extends POSDevice {
         ret=getPsamDevice().sendAPDU(HexUtil.hexStringToByte(apduPsamCardBegin));
         if(ret==null)
         {
-            return false;
+            return null;
         }
         Log.d("Debit","结果："+HexUtil.bytesToHexString(ret));
         byte[] posSeq=new byte[4];
@@ -178,7 +178,7 @@ public class DeviceV8 extends POSDevice {
             String msg="用户卡交易完成失败";
             Log.d("Debit",msg);
             setErrorMessage(msg);
-            return  false;
+            return  null;
         }
         byte[] tac=new byte[4];
         System.arraycopy(ret,0,tac,0,4);
@@ -213,16 +213,16 @@ public class DeviceV8 extends POSDevice {
             Log.d(tag,"保存交易失败："+db.errorMessageString);
         }
 
-        return true;
+        return debitRecord;
     }
 
     @Override
-    public boolean complexDebit(CPUUserCard userCard, int amount) {
+    public DebitRecord complexDebit(CPUUserCard userCard, int amount) {
         String tag="ComplexDebit";
         V8PsamDevice psamDevice=(V8PsamDevice)getPsamDevice();
         if(!openPSAMCard())
         {
-            return false;
+            return null;
         }
 
         //SAM卡选1001目录
@@ -257,7 +257,7 @@ public class DeviceV8 extends POSDevice {
         Log.d("Debit","认证指令："+apduCardAuth+" Result:"+HexUtil.bytesToHexString(ret));
         if(ret==null)
         {
-            return false;
+            return null;
         }
 
         //用户卡开始交易
@@ -268,7 +268,7 @@ public class DeviceV8 extends POSDevice {
         if(ret==null||ret.length<15)
         {
             setErrorMessage("用户卡开始交易失败："+HexUtil.bytesToHexString(ret));
-            return false;
+            return null;
         }
         //解析卡结果
         byte[] balance=new byte[4];
@@ -306,7 +306,7 @@ public class DeviceV8 extends POSDevice {
         if(ret==null)
         {
             Log.d(tag,"PSAM Begin failure.");
-            return false;
+            return null;
         }
         byte[] posSeq1=new byte[4];
         System.arraycopy(ret,0,posSeq,0,4);
@@ -321,7 +321,7 @@ public class DeviceV8 extends POSDevice {
         {
             Log.d(tag,"用户卡更新复合消费缓存 apdu:"+apduUserCardUpdateCache+" Cause:"
                     +getRfcpuDevice().getErrorMessage());
-            return false;
+            return null;
         }
         Log.d(tag,"用户卡更新复合消费缓存 apdu:"+apduUserCardUpdateCache+" Result:"+HexUtil.bytesToHexString(ret));
 
@@ -335,7 +335,7 @@ public class DeviceV8 extends POSDevice {
             String msg="用户卡交易完成失败";
             Log.d("Debit",msg);
             setErrorMessage(msg);
-            return  false;
+            return  null;
         }
         byte[] tac=new byte[4];
         System.arraycopy(ret,0,tac,0,4);
@@ -345,6 +345,7 @@ public class DeviceV8 extends POSDevice {
         String apduPsamCardEnd="8072000004"+HexUtil.bytesToHexString(mac2);
         ret=getPsamDevice().sendAPDU(HexUtil.hexStringToByte(apduPsamCardEnd));
         Log.d(tag,"PSAM卡完成交易 apdu:"+apduPsamCardEnd+" Result:"+HexUtil.bytesToHexString(ret));
-        return true;
+
+        return null;
     }
 }

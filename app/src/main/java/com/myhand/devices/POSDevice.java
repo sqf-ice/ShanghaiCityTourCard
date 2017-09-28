@@ -2,6 +2,7 @@ package com.myhand.devices;
 
 import com.myhand.common.Converter;
 import com.myhand.cpucard.CPUUserCard;
+import com.myhand.cpucard.DebitRecord;
 import com.myhand.cpucard.PSAMCard;
 import com.myhand.cpucard.SHTCPsamCard;
 import com.myhand.shanghaicitytourcard.CityTourCard;
@@ -123,9 +124,9 @@ public abstract class POSDevice {
     //读取CPU用户卡
     public abstract CityTourCard readCard();
     //用户卡简单消费
-    public abstract boolean debit(CPUUserCard userCard,int amount);
+    public abstract DebitRecord debit(CPUUserCard userCard, int amount);
     //用户卡复合消费
-    public abstract boolean complexDebit(CPUUserCard userCard,int amount);
+    public abstract DebitRecord complexDebit(CPUUserCard userCard,int amount);
     public POSDevice() {
         posSequence=0;
         user=new User("123456","111111");

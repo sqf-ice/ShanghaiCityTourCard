@@ -6,6 +6,8 @@
         android:minSdkVersion="21"
         android:targetSdkVersion="23" />
 
+    <uses-permission android:name="android.permission.NFC" />
+
     <!-- SDCard中创建与删除文件权限 -->
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <!-- 向SDCard写入数据权限 -->
@@ -90,6 +92,7 @@
         <activity
             android:name=".CityCardQueryActivity"
             android:label="@string/title_activity_city_card_query"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:parentActivityName=".BaseTourCardActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data

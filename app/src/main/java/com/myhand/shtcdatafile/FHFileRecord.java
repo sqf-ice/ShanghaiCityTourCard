@@ -55,41 +55,23 @@ public class FHFileRecord extends FileRecord {
 
     public void fromDebitRecord(DebitRecord record){
         setFieldData(0,record.getCorpID());
-        Log.d("from",getData());
         setFieldData(1,(int)record.getLocalTxnSeq());
-        Log.d("from",getData());
         setFieldData(2,record.getTxnAttr());
-        Log.d("from",getData());
         setFieldData(3,record.getStationID());
-        Log.d("from",getData());
         setFieldData(4,record.getOprID());
-        Log.d("from",getData());
         setFieldData(5,record.getBusID());
-        Log.d("from",getData());
         setFieldData(6,record.getTxnType());
-        Log.d("from",getData());
         setFieldData(7,record.getPosSeq());
-        Log.d("from",getData());
         setFieldData(8,record.getCityCode());
-        Log.d("from",getData());
         setFieldData(9,record.getCardFaceNum());
-        Log.d("from",getData());
         setFieldData(10,record.getCardKind());
-        Log.d("from",getData());
         setFieldData(11,(int)record.getBalanceBef());
-        Log.d("from",getData());
         setFieldData(12,(int)record.getAmount());
-        Log.d("from",getData());
         setFieldData(13,record.getTxnTime());
-        Log.d("from",getData());
-        setFieldData(14,record.getPosID());
-        Log.d("from",getData());
+        setFieldData(14,record.getTxnCounter());
         setFieldData(15,record.getPosID());
-        Log.d("from",getData());
         setFieldData(16,record.getTac());
-        Log.d("from",getData());
         setFieldData(17,record.getCardVerNo());
-        Log.d("from",getData());
     }
 
     public DebitRecord toDebitRecord(){

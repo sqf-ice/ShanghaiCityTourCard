@@ -119,7 +119,7 @@ public class CityCardQueryActivity extends BaseTourCardActivity {
                     editTextAmount.setHint("请输入正确的金额");
                     return;
                 }
-                if(!posDevice.debit(card,debitAmount))
+                if(posDevice.debit(card,debitAmount)==null)
                 {
                     mLogString.add(0,posDevice.getErrorMessage());
                 }else{
