@@ -9,4 +9,6 @@
 #define UBYTE unsigned char
 #endif
 
+#include <memory.h>
+
 #endif //SHANGHAICITYTOURCARD_SHMETRO_COMMON_H

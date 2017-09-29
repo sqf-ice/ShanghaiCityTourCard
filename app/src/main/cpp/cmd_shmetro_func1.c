@@ -5,6 +5,9 @@
 
 
 #include "shmetro_common.h"
+#include "user_global.h"
+#include "prot_shmetro.h"
+
 //start of file
 
 //UBYTE HL_Active(void);

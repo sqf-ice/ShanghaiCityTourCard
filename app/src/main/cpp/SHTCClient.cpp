@@ -17,7 +17,7 @@
 
 int sockfd;
 
-int Connect(char* ip, unsigned short port)
+int connect(char* ip, unsigned short port)
 {
     sockfd=socket(AF_INET,SOCK_STREAM,0);//IPPROTO_TCP);
     struct sockaddr_in sockaddr;
@@ -34,7 +34,28 @@ int Connect(char* ip, unsigned short port)
     return 0;
 }
 
-int Send(void* data,int length)
+/**
+ * 接收指定长度的数据
+ * @param sockfd
+ * @param buffer
+ * @param length
+ * @param timeout
+ * @return
+ */
+int recv_n(int sockfd,void* buffer,int length,int flag){
+    int rcvCount=0;
+
+    return rcvCount;
+}
+int send(void* data,int length,void* rcvBuffer, int& rcvLength,int flag)
 {
+    int sendcnt=send(sockfd,data,length,flag);
+    if(sendcnt!=length){
+        return 1;
+    }
+
+    int rcvCount=0;
+    //接收服务器回应
+    rcvCount=recv_n(sockfd,rcvBuffer,4,flag);
     return 0;
 }

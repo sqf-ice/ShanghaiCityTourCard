@@ -18,9 +18,25 @@ add_library( # Sets the name of the library.
 
              # Provides a relative path to your source file(s).
              src/main/cpp/native-lib.cpp
-             #src/main/cpp/SHTCClient.cpp
-             #src/main/cpp/cmd_shmetro_func1.c
-             #src/main/cpp/cmd_shmetro_func2.c
+             )
+
+add_library( # Sets the name of the library.
+             sptcc-client-lib
+
+             # Sets the library as a shared library.
+             SHARED
+
+             # Provides a relative path to your source file(s).
+             src/main/cpp/SHTCClient.cpp
+             )
+add_library( # Sets the name of the library.
+            sptcc-dataexchange-lib
+
+             # Sets the library as a shared library.
+             SHARED
+
+             # Provides a relative path to your source file(s).
+             src/main/cpp/dataexchange/CFieldDef.cpp
              )
 
 # Searches for a specified prebuilt library and stores the path as a

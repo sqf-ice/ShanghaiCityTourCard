@@ -5,6 +5,7 @@
 //start of file
 
 #include "mydefine.h.h"
+#include "prot_shmetro.h"
 
 #define RLED_INDEX  0
 #define GLED_INDEX  1

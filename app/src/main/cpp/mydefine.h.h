@@ -8,4 +8,8 @@
 #define UDWORD unsigned long
 #define UWORD unsigned short
 
+#define SHMETRO_CE_CARDREMOVED 1
+
+UBYTE mcml_load_key();
+
 #endif //SHANGHAICITYTOURCARD_MYDEFINE_H_H

@@ -1,0 +1,14 @@
+//
+// Created by wenha_000 on 2017-09-29.
+//
+
+#ifndef SHANGHAICITYTOURCARD_CDEBITRECORD_H
+#define SHANGHAICITYTOURCARD_CDEBITRECORD_H
+
+
+class CDebitRecord {
+
+};
+
+
+#endif //SHANGHAICITYTOURCARD_CDEBITRECORD_H
