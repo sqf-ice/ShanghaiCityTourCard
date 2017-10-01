@@ -33,10 +33,13 @@ public class DataBlock {
 
     public void setFieldsLength(byte[] fieldsLength) {
         this.fieldsLength = fieldsLength;
+        Log.d(tag,String.format("Data Length:%d",getDataFieldLength()));
         this.data=new String(new byte[getDataFieldLength()]);
+/*
         for(int i=0;i<data.length();i++){
             this.data+="0";
         }
+*/
     }
 
     public int getFieldCount()

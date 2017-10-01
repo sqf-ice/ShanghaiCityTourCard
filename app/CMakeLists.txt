@@ -19,16 +19,6 @@ add_library( # Sets the name of the library.
              # Provides a relative path to your source file(s).
              src/main/cpp/native-lib.cpp
              )
-
-add_library( # Sets the name of the library.
-             sptcc-client-lib
-
-             # Sets the library as a shared library.
-             SHARED
-
-             # Provides a relative path to your source file(s).
-             src/main/cpp/SHTCClient.cpp
-             )
 add_library( # Sets the name of the library.
             sptcc-dataexchange-lib
 
@@ -37,6 +27,18 @@ add_library( # Sets the name of the library.
 
              # Provides a relative path to your source file(s).
              src/main/cpp/dataexchange/CFieldDef.cpp
+             src/main/cpp/dataexchange/CDataFrame.cpp
+             src/main/cpp/dataexchange/CDebitRecord.cpp
+             src/main/cpp/dataexchange/CFHFileDebitRecord.cpp
+             )
+add_library( # Sets the name of the library.
+            sptcc-transport-lib
+
+             # Sets the library as a shared library.
+             SHARED
+
+             # Provides a relative path to your source file(s).
+             src/main/cpp/transport/CSPTCCClient.cpp
              )
 
 # Searches for a specified prebuilt library and stores the path as a

@@ -23,7 +23,7 @@ import java.util.List;
 
 //设备端数据库
 public class DatabaseSHCT extends AppDatabase{
-    private static String tag="SHCT DB";
+    private static String tag=DatabaseSHCT.class.getSimpleName();
 
     private String tbBlkCard="TBBlackCard";
     private String TBDebit="TBDebit";
@@ -63,7 +63,13 @@ public class DatabaseSHCT extends AppDatabase{
                 +String.format("%d,",debitRecord.getTxnCounter())
                 +String.format("'%s',",debitRecord.getPosID())
                 +String.format("'%s',",debitRecord.getTac())
-                +String.format("%d,0)",debitRecord.getCardVerNo());
+                +String.format("%d,0,",debitRecord.getCardVerNo());
+                if(debitRecord.getLastUploadTime()==null){
+                    result+=String.format("null)");
+                }else{
+                    SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    result+=String.format("strftime(%s))",sdf.format(debitRecord.getLastUploadTime()));
+                }
         return result;
     }
 
@@ -183,7 +189,8 @@ public class DatabaseSHCT extends AppDatabase{
             +"PosID varchar(8) not null,"
             +"TAC varchar(8) not null,"
             +"CardVerNo decimal(2) not null,"
-            +"Status decimal(2) not null default 0)";
+            +"Status decimal(2) not null default 0,"
+            +"LastUploadTime date)";
 
     /**
      * 添加黑卡记录
@@ -232,7 +239,7 @@ public class DatabaseSHCT extends AppDatabase{
     }
 
     //查询消费记录
-    public List<DebitRecord> debitQuery(String condition)
+    public List<DebitRecord> debitQuery(String condition,int order)
     {
         List<DebitRecord> result=new ArrayList<DebitRecord>();
 
@@ -241,6 +248,10 @@ public class DatabaseSHCT extends AppDatabase{
         {
             sqlSelect+=condition;
         }
+        if(order>0){
+            sqlSelect+=String.format("\norder by id desc");
+        }
+
         Cursor cursor=ExecQuery(sqlSelect);
         while (cursor.moveToNext())
         {
@@ -266,6 +277,18 @@ public class DatabaseSHCT extends AppDatabase{
             record.setCardVerNo((byte)cursor.getInt(17));
             record.setStatus((byte)cursor.getInt(18));
 
+            if(cursor.isNull(19)){
+                Log.d(tag,"未设置");
+                record.setLastUploadTime(null);
+            }else {
+                Log.d(tag, "LastUploadTime:"+cursor.getString(19));
+                SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                try {
+                    record.setLastUploadTime(sdf.parse(cursor.getString(19)));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
             result.add(record);
         }
 
@@ -278,7 +301,7 @@ public class DatabaseSHCT extends AppDatabase{
      * @return
      */
     public boolean updateRecordStatus(long localSeq,int status){
-        String sqlUpdate=String.format("Update %s set status=%d where id=%d",
+        String sqlUpdate=String.format("Update %s set status=%d,LastUploadTime=datetime('now', 'localtime') where id=%d",
                 TBDebit,status,localSeq);
 
         return ExecCommand(sqlUpdate);

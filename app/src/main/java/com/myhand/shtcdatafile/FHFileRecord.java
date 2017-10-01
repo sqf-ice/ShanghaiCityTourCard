@@ -9,10 +9,11 @@ import com.myhand.cpucard.DebitRecord;
  */
 
 public class FHFileRecord extends FileRecord {
+    private static final String tag=FHFileRecord.class.getSimpleName();
     public FHFileRecord() {
         setFieldsLength(new byte[]{11,8,2,6,16,6,2,12,4,12,2,8,8,14,6,8,8,2,0});
         int length=getDataFieldLength();
-
+        Log.d(tag,String.format("Data:%s length:%d",getData(),getData().length()));
         String data="";
         for(int i=0;i<length;i++){
             data+="0";

@@ -9,10 +9,12 @@
  * 数据域定义类
  */
 class CFieldDef {
+public:
     enum DataType{
         DATA_INT=0x00,
         DATA_STRING=0x01
     };
+private:
     int m_Index;
     int m_Length;
     DataType m_Type;

@@ -82,11 +82,18 @@
                 android:orientation="horizontal">
 
                 <RadioButton
-                    android:id="@+id/radioButtonUpload"
+                    android:id="@+id/radioButtonPosUpload"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="上传" />
+                    android:text="直连POS" />
+
+                <RadioButton
+                    android:id="@+id/radioButtonFileUpload"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="文件上传" />
 
                 <RadioButton
                     android:id="@+id/radioButtonDownload"
@@ -94,13 +101,6 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="下载" />
-
-                <RadioButton
-                    android:id="@+id/radioButtonFull"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="全部" />
 
             </RadioGroup>
 

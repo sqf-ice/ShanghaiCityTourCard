@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.shanghaicitytourcard.R;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.zip.Inflater;
 
@@ -110,7 +111,14 @@ public class DebitQueryAdapter extends BaseAdapter {
         holder.textViewAmount.setText(String.format("消费金额:%d",record.getAmount()));
         holder.textViewCardCounter.setText(String.format("卡计数器:%s",record.getTxnCounter()));
         holder.textViewTxnTime.setText("消费时间："+record.getTxnTime());
-        holder.textViewStatus.setText(String.format("记录状态：%d",record.getStatus()));
+
+        //记录状态
+        String caption=String.format("记录状态：%d",record.getStatus());
+        if(record.getStatus()!=0&&record.getLastUploadTime()!=null){
+            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            caption+=String.format(" 上传时间:%s",sdf.format(record.getLastUploadTime()));
+        }
+        holder.textViewStatus.setText(caption);
 
         return convertView;
     }

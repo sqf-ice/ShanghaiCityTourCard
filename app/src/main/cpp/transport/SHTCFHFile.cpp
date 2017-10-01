@@ -2,7 +2,7 @@
 // Created by wenha_000 on 2017-09-12.
 //
 
-#include "SHTCFHFile.h"
+#include "../SHTCFHFile.h"
 
 int FHFileDescriptionFromeData(FHFileDescription* stFileDesc,char* data,int length)
 {

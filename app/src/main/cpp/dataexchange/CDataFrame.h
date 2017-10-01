@@ -31,6 +31,10 @@ public:
 
     int GetFieldInt(int index);
     void GetFieldStr(int index,char* result);
+
+    CFieldDef *getM_FieldDef() const;
+
+    void setM_FieldDef(CFieldDef *m_FieldDef);
 };
 
 

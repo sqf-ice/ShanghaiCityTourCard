@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
             startDebit();
         }
 
-        testRecord();
+        //testRecord();
     }
 
     private void testRecord(){
@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         fhFileRecord.fromDebitRecord(record);
 
         Log.d(tag,fhFileRecord.getData());
-
+//
         String crcStr=SHTCClient.CRC(fhFileRecord.getData().getBytes());
         String dgStr=String.format("%04d%s%s",fhFileRecord.getData().length()+8,fhFileRecord.getData(),crcStr);
         Log.d(tag,String.format("DG Str:%s Length:%d",dgStr,dgStr.length()));

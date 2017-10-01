@@ -16,6 +16,7 @@ import com.myhand.transport.DGCommHead;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -29,17 +30,26 @@ import java.util.zip.CRC32;
 public class SHTCClient {
     private static final String tag=SHTCClient.class.getSimpleName();
 
+    public static int portUp=12581;
+    public static int portDown=12582;
+
     private int wailtCount;
-    private static final int TRANS_STATUS_IDLE=0;
-    private static final int TRANS_STATUS_REQUEST=1;
-    private static final int TRANS_STATUS_REQUESTOK=2;
-    private static final int TRANS_STATUS_SENDRECORD=3;
-    private static final int TRANS_STATUS_SENDRECORDOK=4;
+    public static final int TRANS_STATUS_IDLE=0;
+
+    public static final int TRANS_STATUS_REQUEST=1;
+    public static final int TRANS_STATUS_REQUESTOK=2;
+    public static final int TRANS_STATUS_SENDRECORD=3;
+    public static final int TRANS_STATUS_SENDRECORDOK=4;
     private int transStatus=TRANS_STATUS_IDLE;
 
     private static final int TRANS_RESULT_FAILURE=0;
     private static final int TRANS_RESULT_SUCCESSFUL=1;
     private int transResult=TRANS_RESULT_SUCCESSFUL;
+
+    public static final int TRANSMODE_POS=0;//POS直连方式
+    public static final int TRANSMODE_DBFILE=1;//文件上传方式
+    public static final int TRANSMODE_DOWNLOAD=2;//下载文件
+    private int currTransMode=TRANSMODE_POS;
 
     private byte[] rcvFrameData;
 
@@ -83,6 +93,14 @@ public class SHTCClient {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public int getCurrTransMode() {
+        return currTransMode;
+    }
+
+    public void setCurrTransMode(int currTransMode) {
+        this.currTransMode = currTransMode;
     }
 
     public SHTCClient(String serverIP, int serverPort) {
@@ -243,7 +261,9 @@ public class SHTCClient {
                     ShowMessage(1,String.format("服务器回应错误码：%s",new String(rcvFrameData)));
                     transResult=TRANS_RESULT_FAILURE;
                 }else {
-                    ShowMessage(0, String.format("服务器回应长度：%s", new String(rcvFrameData)));
+                    String countStr=new String(rcvFrameData);
+                    ShowMessage(0, String.format("服务器回应长度：%s",countStr ));
+                    ShowMessage(0,String.format("已上传记录数%d",Integer.parseInt(countStr)));
                     transResult=TRANS_RESULT_SUCCESSFUL;
                 }
                 transStatus=TRANS_STATUS_REQUESTOK;
@@ -289,21 +309,34 @@ public class SHTCClient {
         }
     }
 
+    public Runnable runnableDownloadFile=new Runnable() {
+        @Override
+        public void run() {
+
+        }
+    };
+
     public Runnable runnableSendDebitRecord=new Runnable() {
+        private int uploadcount=0;
+
         @Override
         public void run() {
             //检查是否存在未上传的交易记录
             POSApplication application=POSApplication.getPOSApplication();
             DatabaseSHCT db=application.getAppDatabase();
-            String condition="";
-            List<DebitRecord> recordList=db.debitQuery(condition);
+            String condition=" where status=0";
+            List<DebitRecord> recordList=db.debitQuery(condition,0);
             if(recordList==null||recordList.isEmpty()){
                 ShowMessage(1,"没有需上传的交易");
                 return;
+            }else {
+                ShowMessage(0,String.format("共有%d条消费交易需要上传，开始上传......",recordList.size()));
             }
 
-            //发送请求头
-            if(!sendRequest()){
+            uploadcount=0;
+            //发送交易上传请求头
+            if(!sendUploadRequest(recordList.size())){
+                ShowMessage(1,"没有需上传的消费记录。");
                 return;
             }
 
@@ -311,18 +344,27 @@ public class SHTCClient {
                 DebitRecord debitRecord=recordList.get(i);
                 if(!sendDebitRecord(debitRecord))
                 {
+                    ShowMessage(1,"数据发送失败，发送过程结束");
                     break;
+                }else {
+                    db.updateRecordStatus(debitRecord.getLocalTxnSeq(),1);
+                    ShowMessage(0, String.format("流水号%d消费交易成功上传",debitRecord.getLocalTxnSeq()));
+                    uploadcount++;
                 }
             }
+
+            ShowMessage(0,String.format("共成功上传了%d条消费交易。",uploadcount));
         }
     };
-    private boolean sendRequest(){
+
+    private boolean sendUploadRequest(int count){
         POSApplication application=POSApplication.getPOSApplication();
         DatabaseSHCT db=application.getAppDatabase();
         transStatus=TRANS_STATUS_REQUEST;
         long sendSeq=db.getPosSendSequence(application.getPosDevice().getPosID()) ;
         DGCommHead head=new DGCommHead();
         head.setSendSeq((int)sendSeq);
+        head.setFileSize(count);
         String sendStr=head.toString();
         Log.d(tag,"DG:"+sendStr+String.format(" Length:%d",sendStr.length()));
         SendStringData(sendStr);
@@ -352,15 +394,15 @@ public class SHTCClient {
     private boolean sendDebitRecord(DebitRecord record){
         FHFileRecord fileRecord=new FHFileRecord();
         Log.d(tag,String.format("记录长度：%d",fileRecord.getDataFieldLength()));
-        //fileRecord.fromDebitRecord(record);
+        fileRecord.fromDebitRecord(record);
         String dataStr=fileRecord.getData();
         Log.d(tag,"记录数据："+dataStr);
-        ShowMessage(0,dataStr);
+        //ShowMessage(0,dataStr);
         String crcStr=CRC(dataStr.getBytes());
         Log.d(tag,String.format("CRC:%s 长度%d",crcStr,crcStr.length()));
-        String sendData=String.format("%04d%s%s",dataStr.length()+8,dataStr, crcStr);
+        String sendData=String.format("%s%s",dataStr, crcStr);
         Log.d(tag,"发送数据："+sendData);
-        ShowMessage(0,sendData);
+        //ShowMessage(0,sendData);
         transStatus=TRANS_STATUS_SENDRECORD;
         SendStringData(sendData);
         wailtCount=300;

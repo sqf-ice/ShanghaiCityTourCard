@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -33,12 +34,9 @@ public class SendDataActivity extends AppCompatActivity {
 
     private SHTCClient client;
     private String IP=IPLOCAL1;
+    private int currPort;
 
     //private String IP="";
-
-    private int portUp=12581;
-    private int portDown=12582;
-
     private List<ErrorMessage> listMessage;
     private ListView listViewMessage;
     private ErrorMessageAdapter errorMessageAdapter;
@@ -48,14 +46,15 @@ public class SendDataActivity extends AppCompatActivity {
     private Button btnSendData;
     private Button btnServerSet;
     private Button btnConnect;
+    private Button btnClose;
 
     private RadioButton radioButtonServerLocal1;
     private RadioButton radioButtonServerLocal2;
     private RadioButton radioButtonServerTest;
 
-    private RadioButton radioButtonUpload;
+    private RadioButton radioButtonPOSUpload;
     private RadioButton radioButtonDownload;
-    private RadioButton radioButtonTransFull;
+    private RadioButton radioButtonFileUpload;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +72,11 @@ public class SendDataActivity extends AppCompatActivity {
             }
         });
 
+        client=new SHTCClient(IP,currPort);//("192.168.100.109",12581);
+
         txtViewMessage=(TextView)findViewById(R.id.textViewMessage);
         btnSendData=(Button)findViewById(R.id.buttonSend);
+        //btnSendData.setEnabled(false);
         btnSendData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,16 +89,47 @@ public class SendDataActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //client=new SHTCClient("130.251.1.189",12581);
-                client=new SHTCClient(IP,portUp);//("192.168.100.109",12581);
+                client.setServerIP(IP);
+                client.setServerPort(currPort);
                 client.setHandler(mHandler);
                 //progressDialog=new ProgressDialog(SendDataActivity.this);
 
-                new Thread(runnable).start();
+                new Thread(runnableConnect).start();
+                btnConnect.setEnabled(false);
             }
         });
 
+        btnClose=(Button)findViewById(R.id.buttonClose);
+        //btnClose.setEnabled(false);
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                client.close();
+/*
+                btnClose.setEnabled(false);
+                btnConnect.setEnabled(true);
+                btnSendData.setEnabled(false);
+*/
+            }
+        });
         initSelectButton();
+        initSetTransMode();
         initErrorMessageControl();
+
+
+    }
+
+    private void initSetTransMode(){
+        radioButtonPOSUpload=(RadioButton)findViewById(R.id.radioButtonPosUpload);
+        radioButtonPOSUpload.setChecked(true);
+        currPort=SHTCClient.portUp;
+        client.setCurrTransMode(SHTCClient.TRANSMODE_POS);
+
+        radioButtonPOSUpload.setOnClickListener(setTransMode);
+        radioButtonFileUpload=(RadioButton)findViewById(R.id.radioButtonFileUpload);
+        radioButtonFileUpload.setOnClickListener(setTransMode);
+        radioButtonDownload=(RadioButton)findViewById(R.id.radioButtonDownload);
+        radioButtonDownload.setOnClickListener(setTransMode);
     }
 
     private void initErrorMessageControl(){
@@ -123,6 +156,22 @@ public class SendDataActivity extends AppCompatActivity {
         }
     };
 
+    private View.OnClickListener setTransMode=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if(v==findViewById(R.id.radioButtonPosUpload)){
+                client.setCurrTransMode(SHTCClient.TRANSMODE_POS);
+                client.setServerPort(SHTCClient.portUp);
+            }else if(v==findViewById(R.id.radioButtonFileUpload)){
+                client.setCurrTransMode(SHTCClient.TRANSMODE_DBFILE);
+                client.setServerPort(SHTCClient.portUp);
+            }else if(v==findViewById(R.id.radioButtonDownload)){
+                client.setCurrTransMode(SHTCClient.TRANSMODE_DOWNLOAD);
+                client.setServerPort(SHTCClient.portDown);
+            }
+        }
+    };
+
     private void initSelectButton(){
         radioButtonDownload=(RadioButton)findViewById(R.id.radioButtonDownload);
         radioButtonDownload.setOnClickListener(selectServer);
@@ -135,6 +184,8 @@ public class SendDataActivity extends AppCompatActivity {
 
         radioButtonServerTest=(RadioButton)findViewById(R.id.radioButtonServerTest);
         radioButtonServerTest.setOnClickListener(selectServer);
+        radioButtonServerTest.setChecked(true);
+        IP=IPTEST;
     }
     public Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
@@ -159,9 +210,15 @@ public class SendDataActivity extends AppCompatActivity {
 
     private ProgressDialog progressDialog;
 
-    Runnable runnable=new Runnable() {
+    private void connectOK(){
+        btnConnect.setEnabled(false);
+        btnSendData.setEnabled(true);
+        btnClose.setEnabled(true);
+    }
+    Runnable runnableConnect=new Runnable() {
         @Override
         public void run() {
+
 //            progressDialog.setMessage("开始连接服务器......");
 //            progressDialog.show();
             //ShowMessage("开始连接服务器......");
@@ -169,11 +226,14 @@ public class SendDataActivity extends AppCompatActivity {
             {
 //                progressDialog.setMessage("连接服务器失败");
 //                progressDialog.hide();
+                btnSendData.setEnabled(false);
                 return;
             }
+            //connectOK();
 //            new Thread(runnableReceive).start();
             //ShowMessage("服务器连接成功。");
-        }
+
+         }
     };
 
     /**

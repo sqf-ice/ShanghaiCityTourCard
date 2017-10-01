@@ -12,7 +12,6 @@
 CDataFrame::CDataFrame(int fieldCount)
 :m_FieldCount(fieldCount),m_FieldDef(new CFieldDef[fieldCount])
 {
-
 }
 
 CDataFrame::CDataFrame(int fieldCount,CFieldDef* fieldDef)
@@ -31,6 +30,14 @@ CDataFrame::~CDataFrame()
     {
         delete [] m_FieldDef;
     }
+}
+
+CFieldDef *CDataFrame::getM_FieldDef() const {
+    return m_FieldDef;
+}
+
+void CDataFrame::setM_FieldDef(CFieldDef *m_FieldDef) {
+    CDataFrame::m_FieldDef = m_FieldDef;
 }
 
 unsigned short CDataFrame::GetFrameLength()

@@ -6,6 +6,7 @@ package com.myhand.cpucard;
 
 import com.myhand.shtcdatafile.FHFileRecord;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -51,6 +52,7 @@ public class DebitRecord {
     private byte cardVerNo;
     private byte status;
 
+    private Date lastUploadTime;
     public DebitRecord() {
     }
 
@@ -76,6 +78,14 @@ public class DebitRecord {
         this.tac = tac;
         this.cardVerNo = cardVerNo;
         this.status=status;
+    }
+
+    public Date getLastUploadTime() {
+        return lastUploadTime;
+    }
+
+    public void setLastUploadTime(Date lastUploadTime) {
+        this.lastUploadTime = lastUploadTime;
     }
 
     public String getCorpID() {
