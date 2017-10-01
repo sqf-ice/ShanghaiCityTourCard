@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.centerm.smartpos.aidl.psam.AidlPsam;
 import com.centerm.smartpos.aidl.rfcard.AidlRFCard;
+import com.centerm.smartpos.aidl.soundplayer.AidlSoundPlayer;
 import com.centerm.smartpos.aidl.sys.AidlDeviceManager;
 import com.centerm.smartpos.constant.Constant;
 import com.centerm.smartpos.util.HexUtil;
@@ -28,6 +29,7 @@ import com.myhand.devices.POSDevice;
 import com.myhand.devices.RFCPUDevice;
 import com.myhand.devices.V8PsamDevice;
 import com.myhand.devices.V8RFCPUDevice;
+import com.myhand.devices.V8Sounder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,7 @@ public class CityCardQueryActivity extends BaseTourCardActivity {
     //本机对应设备
     private POSDevice posDevice;
 
+    private V8Sounder soundPlayer;
     private AidlPsam psam1 = null;
     private AidlPsam psam2 = null;
     private AidlPsam psam3 = null;
@@ -114,12 +117,25 @@ public class CityCardQueryActivity extends BaseTourCardActivity {
                     editTextAmount.setHint("请输入消费金额");
                     return;
                 }
-                int debitAmount=Integer.parseInt(txtAmount);
+                long debitAmount=Long.parseLong(txtAmount);
                 if(debitAmount<=0){
                     editTextAmount.setHint("请输入正确的金额");
                     return;
                 }
-                if(posDevice.debit(card,debitAmount)==null)
+
+//                soundPlayer.insertCard();
+//                soundPlayer.confirmCardNoAmount();
+                soundPlayer.intelligenceAmountReader(txtAmount);
+                if(card==null){
+                    Toast.makeText(CityCardQueryActivity.this,"请先读卡",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if(debitAmount>card.getBalance()){
+                    soundPlayer.balance();
+                    return;
+                }
+
+                if(posDevice.debit(card,(int)debitAmount)==null)
                 {
                     mLogString.add(0,posDevice.getErrorMessage());
                 }else{
@@ -136,6 +152,9 @@ public class CityCardQueryActivity extends BaseTourCardActivity {
             @Override
             public void onClick(View v) {
             card=posDevice.readCard();
+                if(card==null){
+                    soundPlayer.insertCard();
+                }
             showCardInfo(card);
             mLogAdapter.notifyDataSetChanged();
             }
@@ -192,6 +211,10 @@ public class CityCardQueryActivity extends BaseTourCardActivity {
     @Override
     public void onDeviceConnected(AidlDeviceManager deviceManager) {
         try {
+            soundPlayer=new V8Sounder();
+            soundPlayer.setSoundPlayer(AidlSoundPlayer.Stub.asInterface(deviceManager
+                    .getDevice(Constant.DEVICE_TYPE.DEVICE_TYPE_SOUNDPLAYER)));
+            //soundPlayer.intelligenceAmountReader("3.1415");
             posDevice=((POSApplication)getApplication()).getPosDevice();
             this.psam1 = AidlPsam.Stub.asInterface(deviceManager
                     .getDevice(Constant.DEVICE_TYPE.DEVICE_TYPE_PSAM1));
