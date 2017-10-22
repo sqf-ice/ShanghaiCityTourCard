@@ -38,8 +38,16 @@ public class SHTCClient {
 
     public static final int TRANS_STATUS_REQUEST=1;
     public static final int TRANS_STATUS_REQUESTOK=2;
-    public static final int TRANS_STATUS_SENDRECORD=3;
-    public static final int TRANS_STATUS_SENDRECORDOK=4;
+
+    public static final int TRANS_STATUS_BATCHINFO=3;
+    public static final int TRANS_STATUS_BATCHINFOOK=4;
+
+    public static final int TRANS_STATUS_SENDRECORD=5;
+    public static final int TRANS_STATUS_SENDRECORDOK=6;
+
+    public static final int TRANS_STATUS_SENDTAIL=7;
+    public static final int TRANS_STATUS_SENDTAILOK=8;
+
     private int transStatus=TRANS_STATUS_IDLE;
 
     private static final int TRANS_RESULT_FAILURE=0;
@@ -182,10 +190,12 @@ public class SHTCClient {
             Log.d(tag,"realsenddata:"+realSendStr);
 
             byte[] sendData=realSendStr.getBytes();
-            Log.d(tag,"Send Data:"+ HexUtil.bytesToHexString(sendData));
+            //Log.d(tag,"Send Data:"+ HexUtil.bytesToHexString(sendData));
             writeStream.write(sendData, 0, sendData.length);
+/*
             Log.d(tag,"Send OK");
             ShowMessage(0,"数据成功发送");
+*/
         }catch (Exception ex)
         {
             Log.d(tag,ex.getLocalizedMessage());
@@ -269,10 +279,22 @@ public class SHTCClient {
                 transStatus=TRANS_STATUS_REQUESTOK;
                 break;
             }
+            case TRANS_STATUS_BATCHINFO:
+            {
+                ShowMessage(0,String.format("服务器回应：%s",new String(rcvFrameData)));
+                transStatus=TRANS_STATUS_BATCHINFOOK;
+                break;
+            }
             case TRANS_STATUS_SENDRECORD:
             {
                 ShowMessage(0,String.format("服务器回应：%s",new String(rcvFrameData)));
                 transStatus=TRANS_STATUS_SENDRECORDOK;
+                break;
+            }
+            case TRANS_STATUS_SENDTAIL:
+            {
+                ShowMessage(0,String.format("服务器回应：%s",new String(rcvFrameData)));
+                transStatus=TRANS_STATUS_SENDTAILOK;
                 break;
             }
             default:
@@ -340,11 +362,19 @@ public class SHTCClient {
                 return;
             }
 
+            //上传批次信息
+            if(!sendBatchInfo(recordList.size())){
+                ShowMessage(1,"批次信息发送失败，发送过程结束");
+                return;
+            }
+
+            int sum=0;
             for(int i=0;i<recordList.size();i++){
                 DebitRecord debitRecord=recordList.get(i);
+                sum+=debitRecord.getAmount();
                 if(!sendDebitRecord(debitRecord))
                 {
-                    ShowMessage(1,"数据发送失败，发送过程结束");
+                    ShowMessage(1,"消费记录数据发送失败，发送过程结束");
                     break;
                 }else {
                     db.updateRecordStatus(debitRecord.getLocalTxnSeq(),1);
@@ -353,9 +383,50 @@ public class SHTCClient {
                 }
             }
 
+            //上传尾报文
+            if(!sendTailData(recordList.size(),sum))
+            {
+                ShowMessage(1,"尾报文发送失败");
+                return;
+            }
+
             ShowMessage(0,String.format("共成功上传了%d条消费交易。",uploadcount));
         }
+
+
     };
+
+    private boolean sendTailData(int count,int sum){
+        FHFileTail fileTail=new FHFileTail(count,sum);
+
+        String dataStr=fileTail.getData();
+        //带校验上送批次信息
+        String crcStr=CRC(dataStr.getBytes());
+        //Log.d(tag,String.format("CRC:%s 长度%d",crcStr,crcStr.length()));
+        String sendData=String.format("%s%s",dataStr, crcStr);
+
+        Log.d(tag,String.format("上传尾报文(%d):%s",sendData.length(),sendData));
+
+        transStatus=TRANS_STATUS_SENDTAIL;
+        SendStringData(sendData);
+
+        wailtCount=300;
+        while (transStatus!=TRANS_STATUS_SENDTAILOK&&wailtCount>=0){
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            wailtCount--;
+        }
+        if(wailtCount<0){
+            ShowMessage(1,"等待服务器回应记录发送回应超时，结束发送过程");
+            return false;
+        }
+
+        transStatus=TRANS_STATUS_IDLE;
+        return true;
+    }
 
     private boolean sendUploadRequest(int count){
         POSApplication application=POSApplication.getPOSApplication();
@@ -366,7 +437,7 @@ public class SHTCClient {
         head.setSendSeq((int)sendSeq);
         head.setFileSize(count);
         String sendStr=head.toString();
-        Log.d(tag,"DG:"+sendStr+String.format(" Length:%d",sendStr.length()));
+        Log.d(tag,String.format("上传请求报文:%s(Length:%d)",sendStr,sendStr.length()));
         SendStringData(sendStr);
         //等待服务器回应
         wailtCount=300;
@@ -391,15 +462,50 @@ public class SHTCClient {
         return true;
     }
 
+    private boolean sendBatchInfo(int recordCnt)
+    {
+        FHFileRecord fileRecord=new FHFileRecord();
+
+        FHFileDescription fileDescription=new FHFileDescription(recordCnt,fileRecord.getDataFieldLength(),true);
+        String dataStr=fileDescription.getData();
+        //带校验上送批次信息
+        String crcStr=CRC(dataStr.getBytes());
+        //Log.d(tag,String.format("CRC:%s 长度%d",crcStr,crcStr.length()));
+        String sendData=String.format("%s%s",dataStr, crcStr);
+
+        Log.d(tag,String.format("上传批次纪录头(%d):'%s'",sendData.length(),sendData));
+
+        transStatus=TRANS_STATUS_BATCHINFO;
+        SendStringData(sendData);
+
+        wailtCount=300;
+        while (transStatus!=TRANS_STATUS_BATCHINFOOK&&wailtCount>=0){
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            wailtCount--;
+        }
+        if(wailtCount<0){
+            ShowMessage(1,"等待服务器回应记录发送回应超时，结束发送过程");
+            return false;
+        }
+
+        transStatus=TRANS_STATUS_IDLE;
+        return true;
+
+    }
     private boolean sendDebitRecord(DebitRecord record){
         FHFileRecord fileRecord=new FHFileRecord();
-        Log.d(tag,String.format("记录长度：%d",fileRecord.getDataFieldLength()));
+        //Log.d(tag,String.format("记录长度：%d",fileRecord.getDataFieldLength()));
         fileRecord.fromDebitRecord(record);
         String dataStr=fileRecord.getData();
-        Log.d(tag,"记录数据："+dataStr);
+
+        //Log.d(tag,String.format("上传记录数据(%d):'%s'",dataStr.length(),dataStr));
         //ShowMessage(0,dataStr);
         String crcStr=CRC(dataStr.getBytes());
-        Log.d(tag,String.format("CRC:%s 长度%d",crcStr,crcStr.length()));
+        //Log.d(tag,String.format("CRC:%s 长度%d",crcStr,crcStr.length()));
         String sendData=String.format("%s%s",dataStr, crcStr);
         Log.d(tag,"发送数据："+sendData);
         //ShowMessage(0,sendData);

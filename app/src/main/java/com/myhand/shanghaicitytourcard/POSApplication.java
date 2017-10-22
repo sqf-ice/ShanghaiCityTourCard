@@ -51,7 +51,7 @@ public class POSApplication extends Application{
         return appDatabase;
     }
 
-    private static POSApplication instance;
+    public static POSApplication instance;
     // 获取Application
     public static POSApplication getPOSApplication() {
         return instance;

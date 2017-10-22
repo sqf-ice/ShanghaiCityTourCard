@@ -1,6 +1,7 @@
 package com.myhand.control;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.DataSetObserver;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,8 +11,12 @@ import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.centerm.smartpos.util.HexUtil;
 import com.myhand.cpucard.DebitRecord;
+import com.myhand.cpucard.SHTCCPUUserCard;
 import com.myhand.shanghaicitytourcard.R;
+import com.myhand.shanghaicitytourcard.TextViewActivity;
+import com.myhand.shtcdatafile.FHFileRecord;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -62,12 +67,15 @@ public class DebitQueryAdapter extends BaseAdapter {
     static class ViewHolder
     {
         public TextView textViewLocalSeg;
-
         public TextView textViewCardNo;
+
+        public TextView textViewInnerNo;
         public TextView textViewCardCounter;
 
+        public TextView textViewCorpID;
         public TextView textViewPosID;
         public TextView textViewPosSeq;
+
 
         public TextView textViewBalanceBef;
         public TextView textViewAmount;
@@ -84,8 +92,11 @@ public class DebitQueryAdapter extends BaseAdapter {
             holder = new ViewHolder();
             convertView = mInflater.inflate(R.layout.item_debitquery, null);
             holder.textViewLocalSeg = (TextView) convertView.findViewById(R.id.textViewLocalSeq);
+            holder.textViewInnerNo=(TextView)convertView.findViewById(R.id.textViewInnerNo) ;
+
             holder.textViewCardNo = (TextView)convertView.findViewById(R.id.textViewFaceNo);
 
+            holder.textViewCorpID=(TextView) convertView.findViewById(R.id.textViewCorpID);
             holder.textViewPosID=(TextView)convertView.findViewById(R.id.textViewPosID);
             holder.textViewPosSeq=(TextView) convertView.findViewById(R.id.textViewPosSeq);
 
@@ -100,16 +111,20 @@ public class DebitQueryAdapter extends BaseAdapter {
             holder = (ViewHolder)convertView.getTag();
         }
 
-        DebitRecord record=listDebit.get(position);
+        final DebitRecord record=listDebit.get(position);
         holder.textViewLocalSeg.setText(String.format("本地流水：%d",record.getLocalTxnSeq()));
-        holder.textViewCardNo.setText("卡号："+record.getCardFaceNum());
+        holder.textViewCardNo.setText("卡面号："+
+                SHTCCPUUserCard.CardFaceNum(HexUtil.hexStringToByte((record.getCardFaceNum().substring(8)))));
+
+        holder.textViewInnerNo.setText("卡内号:"+record.getCardFaceNum());
 
         holder.textViewPosID.setText("Pos机号:"+record.getPosID());
         holder.textViewPosSeq.setText(String.format("POS流水号：%s",record.getPosSeq()));
 
+        holder.textViewCorpID.setText(String.format("营运单位:%s",record.getCorpID()));
         holder.textViewBalanceBef.setText(String.format("消费前金额：%d",record.getBalanceBef()));
         holder.textViewAmount.setText(String.format("消费金额:%d",record.getAmount()));
-        holder.textViewCardCounter.setText(String.format("卡计数器:%s",record.getTxnCounter()));
+        holder.textViewCardCounter.setText(String.format("卡计数器:%d",record.getTxnCounter()));
         holder.textViewTxnTime.setText("消费时间："+record.getTxnTime());
 
         //记录状态
@@ -119,6 +134,20 @@ public class DebitQueryAdapter extends BaseAdapter {
             caption+=String.format(" 上传时间:%s",sdf.format(record.getLastUploadTime()));
         }
         holder.textViewStatus.setText(caption);
+
+        //增加条目点击事件处理
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent();
+                intent.setClass(context, TextViewActivity.class);
+
+                FHFileRecord fileRecord=new FHFileRecord();
+                fileRecord.fromDebitRecord(record);
+                intent.putExtra("SrcData",fileRecord.getData());
+                context.startActivity(intent);
+            }
+        });
 
         return convertView;
     }

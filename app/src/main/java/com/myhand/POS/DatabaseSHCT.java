@@ -96,6 +96,12 @@ public class DatabaseSHCT extends AppDatabase{
     public static final String sqlCreateAppInfor=String.format("Create Table %s(PosID varchar(20) not null primary key,"
             +"sequence decimal(8) not null default 0,"
             +"sendSequence decimal(8) not null default 0)",TB_PosInfo);
+
+    /**
+     *
+     * @param posID
+     * @return
+     */
     public long getPosSendSequence(String posID)
     {
         String sqlSelect=String.format("Select sendSequence from %s where PosID='%s'",TB_PosInfo,posID);
@@ -271,7 +277,7 @@ public class DatabaseSHCT extends AppDatabase{
             record.setBalanceBef(cursor.getLong(11));
             record.setAmount(cursor.getLong(12));
             record.setTxnTime(cursor.getString(13));
-            record.setTxnCounter((byte)cursor.getInt(14));
+            record.setTxnCounter(cursor.getInt(14));
             record.setPosID(cursor.getString(15));
             record.setTac(cursor.getString(16));
             record.setCardVerNo((byte)cursor.getInt(17));
@@ -342,14 +348,18 @@ public class DatabaseSHCT extends AppDatabase{
 
         Cursor cursor=ExecQuery(sqlSelect);
         List<FHFileUploadInfo> result=new ArrayList<FHFileUploadInfo>();
+        if(cursor==null){
+            return result;
+        }
         while(cursor.moveToNext()){
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             FHFileUploadInfo fhFileUploadInfo= null;
             try {
+                String uploadTimeStr=cursor.getString(3);
                 fhFileUploadInfo = new FHFileUploadInfo(cursor.getString(0),
                         sdf.parse(cursor.getString(1)),
                         cursor.getInt(2),
-                        sdf.parse(cursor.getString(3)));
+                        uploadTimeStr==null?null:sdf.parse(uploadTimeStr));
             } catch (ParseException e) {
                 e.printStackTrace();
                 Log.d(tag,e.getLocalizedMessage());

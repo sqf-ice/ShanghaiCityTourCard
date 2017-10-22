@@ -70,7 +70,7 @@ public class DataBuffer {
         System.arraycopy(data,0,buffer,tail,data.length);
         tail+=data.length;
 
-        Log.d(tag,"data buffer:"+ HexUtil.bytesToHexString(buffer));
+        //Log.d(tag,"data buffer:"+ HexUtil.bytesToHexString(buffer));
         return true;
     }
 

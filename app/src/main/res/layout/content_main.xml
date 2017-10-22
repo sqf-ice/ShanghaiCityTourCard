@@ -42,6 +42,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="消费记录" />
+
+        <Button
+            android:id="@+id/buttonUploadFileInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="消费文件" />
     </LinearLayout>
 
     <TextView

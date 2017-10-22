@@ -92,9 +92,9 @@
         <activity
             android:name=".CityCardQueryActivity"
             android:label="@string/title_activity_city_card_query"
-            android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:parentActivityName=".BaseTourCardActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden|stateUnchanged">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.myhand.shanghaicitytourcard.BaseTourCardActivity" />
@@ -115,7 +115,16 @@
         <service
             android:name="com.myhand.devices.DataExchangeService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+        <activity
+            android:name=".FHFileQueryActivity"
+            android:label="@string/title_activity_fhfile_query"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".TextViewActivity"
+            android:label="@string/title_activity_text_view"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

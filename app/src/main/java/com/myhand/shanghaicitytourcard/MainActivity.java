@@ -100,6 +100,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button btnFHFileUploadInfo=(Button)findViewById(R.id.buttonUploadFileInfo) ;
+        btnFHFileUploadInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent();
+                intent.setClass(MainActivity.this,FHFileQueryActivity.class);
+                startActivityForResult(intent,4);
+            }
+        });
+
         //测试黑名单卡数据库
         POSApplication application=(POSApplication)getApplication();
 

@@ -15,6 +15,7 @@ public class DataBlock {
 
 
     public DataBlock() {
+        data="";
     }
 
 
@@ -33,13 +34,11 @@ public class DataBlock {
 
     public void setFieldsLength(byte[] fieldsLength) {
         this.fieldsLength = fieldsLength;
-        Log.d(tag,String.format("Data Length:%d",getDataFieldLength()));
-        this.data=new String(new byte[getDataFieldLength()]);
-/*
-        for(int i=0;i<data.length();i++){
-            this.data+="0";
+        //初始化原始数据为全0
+        data="";
+        for(int i=0;i<getDataFieldLength();i++){
+            data+='0';
         }
-*/
     }
 
     public int getFieldCount()
@@ -73,13 +72,19 @@ public class DataBlock {
 
     public String getDataField(int index)
     {
+        if(fieldsLength[index]==0){
+            return "";
+        }
         return data.substring(getFieldPos(index),fieldsLength[index]).trim();
     }
 
     public void setFieldData(int index,String fieldData)
     {
+        if(fieldsLength[index]==0){
+            return;
+        }
         String fmtStr=String.format("%%-%ds",fieldsLength[index]);
-        Log.d(tag,fmtStr);
+        //Log.d(tag,fmtStr);
         String tmpStr=String.format(fmtStr,fieldData);
 
         String head="";
@@ -91,12 +96,44 @@ public class DataBlock {
             tail= this.data.substring(getFieldPos(index + 1));
         }
         this.data=head+tmpStr+tail;
-        Log.d(tag,String.format("Index:%d Data:%s Length:%d",index,this.data,this.data.length()));
+        //Log.d(tag,String.format("Index:%d Data:%s Length:%d",index,this.data,this.data.length()));
     }
 
     public void setFieldData(int index,int intData){
+        if(fieldsLength[index]==0){
+            return;
+        }
+
         String fmtStr=String.format("%%0%dd",fieldsLength[index]);
-        Log.d(tag,fmtStr);
+        //Log.d(tag,fmtStr);
         setFieldData(index,String.format(fmtStr,intData));
+    }
+
+    public void setFieldLength(int index,int length){
+        //检查是否需改变相应域的原有初始化数据
+        int oldLength=fieldsLength[index];
+        if(length!=oldLength){
+            String data=getData();
+            Log.d(tag,String.format("Data befor set field length:(%d)%s",data.length(),data));
+            String newData="";
+            //复制之前的数据
+            if(index!=0) {
+                int pos = getFieldPos(index);
+                newData = data.substring(0, pos);
+                Log.d(tag,String.format("Data head:(%d)%s",newData.length(),newData));
+            }
+            //初始化当前数据
+            for(int i=0;i<length;i++){
+                newData+="0";
+            }
+            //复制尾部
+            if(index<fieldsLength.length-1){
+                newData+=data.substring(getFieldPos(index+1));
+            }
+
+            setData(newData);
+            Log.d(tag,String.format("Data after set field length:(%d)%s",newData.length(),newData));
+        }
+        fieldsLength[index]=(byte)length;
     }
 }

@@ -1,10 +1,13 @@
 package com.myhand.shtcdatafile;
 
+import android.util.Log;
+
 /**
  * Created by wenha_000 on 2017-09-12.
  */
 
 public class FHFileDescription extends FileDescription {
+    private static final String tag=FHFileDescription.class.getSimpleName();
     //文件描述数据
     private DataBlock dataBlock;
     //数据域长度
@@ -20,11 +23,11 @@ public class FHFileDescription extends FileDescription {
      SettFlag	AN1	清算标记
      RtnSign	S1	回车符	’\n’
      */
-    public FHFileDescription() {
-        dataBlock=new DataBlock();
-        dataBlock.setData(String.format("16008451%08d%08dFFFFFFFFFFFFFFFFFFFFFFFF00\n",
-            0,0));
-        dataBlock.setFieldsLength(new byte[]{(byte)2,(byte)2,(byte)4,(byte)8,(byte)8,(byte)24,(byte)1,(byte)1,(byte)1});
+    public FHFileDescription(int recordCount,int recordLength,boolean hasTsUsed) {
+        setFieldsLength(new byte[]{(byte)2,(byte)2,(byte)4,(byte)8,(byte)8,(byte)24,(byte)1,(byte)1,(byte)1});
+        setData(String.format("16008451%08d%08dFFFFFFFFFFFFFFFFFFFFFFFF%d0\n",
+            recordCount,recordLength,hasTsUsed?1:0));
+        Log.d(tag,String.format("FH文件头：%s",getData()));
     }
 
     public DataBlock getDataBlock() {

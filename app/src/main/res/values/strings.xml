@@ -79,6 +79,8 @@
     <string name="printer_texisize_higher">这是倍高</string>
     <string name="printer_textsize_wider">这是倍宽</string>
     <string name="printer_higher_wider">这是倍高宽</string>
+    <string name="title_activity_fhfile_query">消费文件查看</string>
+    <string name="title_activity_text_view">字符串显示</string>
 
 
 </resources>
