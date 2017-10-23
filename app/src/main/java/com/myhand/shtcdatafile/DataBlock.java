@@ -36,9 +36,11 @@ public class DataBlock {
         this.fieldsLength = fieldsLength;
         //初始化原始数据为全0
         data="";
-        for(int i=0;i<getDataFieldLength();i++){
+        for(int i=0;i<getDataFieldLength()-1;i++){
             data+='0';
         }
+        data+="\n";
+        Log.d(tag,String.format("Orignal data:(%d)%s",data.length(),data));
     }
 
     public int getFieldCount()
@@ -96,7 +98,10 @@ public class DataBlock {
             tail= this.data.substring(getFieldPos(index + 1));
         }
         this.data=head+tmpStr+tail;
-        //Log.d(tag,String.format("Index:%d Data:%s Length:%d",index,this.data,this.data.length()));
+/*
+        Log.d(tag,String.format("Index:%d Field Data:(%d)%s Field length:%d Data:%s Length:%d",
+                index,fieldData.length(),fieldData,getFieldsLength()[index],this.data,this.data.length()));
+*/
     }
 
     public void setFieldData(int index,int intData){

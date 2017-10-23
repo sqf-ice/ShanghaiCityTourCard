@@ -28,15 +28,8 @@ public class FHFileRecord extends FileRecord {
 
     public FHFileRecord() {
         setFieldsLength(new byte[]{11,8,2,6,16,6,2,12,4,12,2,8,8,14,6,8,8,2,0,1});
-        int length=getDataFieldLength();
-        //Log.d(tag,String.format("Data:%s length:%d",getData(),getData().length()));
-        String data="";
-        for(int i=0;i<length-1;i++){
-            data+="0";
-        }
-        data+='\n';
 
-        setData(data);
+        Log.d(tag,String.format("Data:%s length:%d",getData(),getData().length()));
     }
 
     public FHFileRecord(String unitCode, long localSeq, String stationID, byte txnType, long posSeq, String cityCode,
@@ -74,13 +67,6 @@ public class FHFileRecord extends FileRecord {
     }
 
     public void fromDebitRecord(DebitRecord record){
-        //根据交易判断是否为CPU卡，如果是，添加行业信息，
-        // 此处现简单增加
-        DtlRecCPU dtlRecCPU=new DtlRecCPU(HexUtil.hexStringToByte(record.getCardFaceNum()),
-                HexUtil.hexStringToByte(record.getPosID()),
-                record.getPosSeq());
-        addTsData(dtlRecCPU);
-
         //设置其他域
         setFieldData(0,record.getCorpID());
         setFieldData(1,(int)record.getLocalTxnSeq());
@@ -100,9 +86,17 @@ public class FHFileRecord extends FileRecord {
         setFieldData(12,(int)record.getAmount());
         setFieldData(13,record.getTxnTime());
         setFieldData(14,record.getTxnCounter());
-        setFieldData(15,record.getPosID());
+        setFieldData(15,record.getPosID().substring(4));//取SAM卡号后4个字节
         setFieldData(16,record.getTac());
         setFieldData(17,record.getCardVerNo());
+        Log.d(tag,String.format("Data without TS data:(%d)%s",getData().length(),getData()));
+        //根据交易判断是否为CPU卡，如果是，添加行业信息，
+        // 此处现简单增加
+
+        DtlRecCPU dtlRecCPU=new DtlRecCPU(HexUtil.hexStringToByte(record.getCardFaceNum()),
+                HexUtil.hexStringToByte(record.getPosID()),
+                record.getPosSeq());
+        addTsData(dtlRecCPU);
     }
 
     public DebitRecord toDebitRecord(){
@@ -138,9 +132,9 @@ public class FHFileRecord extends FileRecord {
             tsData+=tsDataList.get(i).getData();
         }
         //存在行业数据，首先更新行业数据的长度
-        Log.d(tag,String.format("Orignal data is (%d)%s",getData().length(),getData()));
+        Log.d(tag,String.format("Data withour ts data:(%d)%s",getData().length(),getData()));
         setFieldLength(18,(byte)tsData.length());
-        Log.d(tag,String.format("Init data is (%d)%s",getData().length(),getData()));
+        //Log.d(tag,String.format("Init data is (%d)%s",getData().length(),getData()));
         setFieldData(18,tsData);
         Log.d(tag,String.format("行业数据(%d):%s,加入行业数据后的数据记录数据(%d):%s",
                 tsData.length(),tsData,getData().length(),getData()));
