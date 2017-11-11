@@ -11,7 +11,7 @@ public class DtlRecCPU extends DtlRec {
         setFieldsLength(new byte[]{4,1,20,2,1,12,8});
         setFieldData(0,1040);
         setFieldData(1,1);
-        setFieldData(3,9);
+        setFieldData(3,0x06);
         setFieldData(4,1);
     }
 

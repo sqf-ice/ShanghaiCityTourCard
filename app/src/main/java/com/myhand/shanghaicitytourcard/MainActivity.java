@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
     public void startDebit()
     {
         Intent intent=new Intent();
-        intent.setClass(MainActivity.this,CityCardQueryActivity.class);
+        intent.setClass(MainActivity.this,CardPayActivity.class);
         Bundle data=new Bundle();
         data.putInt("amount",amount);
         intent.putExtras(data);

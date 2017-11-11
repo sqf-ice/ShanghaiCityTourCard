@@ -4,7 +4,7 @@
 
     <uses-sdk
         android:minSdkVersion="21"
-        android:targetSdkVersion="23" />
+        android:targetSdkVersion="25" />
 
     <uses-permission android:name="android.permission.NFC" />
 
@@ -124,6 +124,20 @@
         <activity
             android:name=".TextViewActivity"
             android:label="@string/title_activity_text_view"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".CardPayActivity"
+            android:label="@string/title_activity_card_pay"
+            android:parentActivityName=".BaseTourCardActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden|stateUnchanged">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.myhand.shanghaicitytourcard.BaseTourCardActivity" />
+        </activity>
+        <activity
+            android:name=".PrintActivity"
+            android:label="@string/title_activity_print"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

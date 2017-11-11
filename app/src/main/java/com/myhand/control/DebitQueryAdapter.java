@@ -71,7 +71,7 @@ public class DebitQueryAdapter extends BaseAdapter {
 
         public TextView textViewInnerNo;
         public TextView textViewCardCounter;
-
+        public TextView textViewTxnAttr;
         public TextView textViewCorpID;
         public TextView textViewPosID;
         public TextView textViewPosSeq;
@@ -93,7 +93,7 @@ public class DebitQueryAdapter extends BaseAdapter {
             convertView = mInflater.inflate(R.layout.item_debitquery, null);
             holder.textViewLocalSeg = (TextView) convertView.findViewById(R.id.textViewLocalSeq);
             holder.textViewInnerNo=(TextView)convertView.findViewById(R.id.textViewInnerNo) ;
-
+            holder.textViewTxnAttr=(TextView)convertView.findViewById(R.id.textViewTxnAttr) ;
             holder.textViewCardNo = (TextView)convertView.findViewById(R.id.textViewFaceNo);
 
             holder.textViewCorpID=(TextView) convertView.findViewById(R.id.textViewCorpID);
@@ -117,7 +117,7 @@ public class DebitQueryAdapter extends BaseAdapter {
                 SHTCCPUUserCard.CardFaceNum(HexUtil.hexStringToByte((record.getCardFaceNum().substring(8)))));
 
         holder.textViewInnerNo.setText("卡内号:"+record.getCardFaceNum());
-
+        holder.textViewTxnAttr.setText(String.format("交易类型:%02X",record.getTxnAttr()));
         holder.textViewPosID.setText("Pos机号:"+record.getPosID());
         holder.textViewPosSeq.setText(String.format("POS流水号：%s",record.getPosSeq()));
 
@@ -135,6 +135,7 @@ public class DebitQueryAdapter extends BaseAdapter {
         }
         holder.textViewStatus.setText(caption);
 
+/*
         //增加条目点击事件处理
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,6 +149,7 @@ public class DebitQueryAdapter extends BaseAdapter {
                 context.startActivity(intent);
             }
         });
+*/
 
         return convertView;
     }

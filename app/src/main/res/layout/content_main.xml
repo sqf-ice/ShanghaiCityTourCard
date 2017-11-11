@@ -19,13 +19,15 @@
             android:id="@+id/buttonLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="登录" />
+            android:text="签到管理"
+            android:textSize="36sp" />
 
         <Button
             android:id="@+id/buttonCardQuery"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="卡查询"
+            android:text="消费"
+            android:textSize="36sp"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="0dp" />
 
@@ -33,7 +35,8 @@
             android:id="@+id/buttonConnect"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="上传"
+            android:text="结算"
+            android:textSize="36sp"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="0dp" />
 
@@ -41,13 +44,15 @@
             android:id="@+id/buttonDebitQuery"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="消费记录" />
+            android:text="重新打印"
+            android:textSize="36sp" />
 
         <Button
             android:id="@+id/buttonUploadFileInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="消费文件" />
+            android:text="消费文件"
+            android:textSize="36sp" />
     </LinearLayout>
 
     <TextView

@@ -1,4 +1,8 @@
 <resources>
+    <!--Card pay-->
+    <string name="cardpaytitle">卡消费</string>
+    <string name="cardpaypromptmsg">请将卡片放置读卡区......</string>
+
     <string name="app_name">上海都市旅游卡</string>
     <string name="action_settings">设置</string>
     <string name="title_activity_tour_card">都市旅游卡操作</string>
@@ -81,6 +85,22 @@
     <string name="printer_higher_wider">这是倍高宽</string>
     <string name="title_activity_fhfile_query">消费文件查看</string>
     <string name="title_activity_text_view">字符串显示</string>
+    <string name="title_activity_card_pay">卡消费</string>
+    <string name="open_print_queue">开启打印队列</string>
+    <string name="close_print_queue">关闭打印队列</string>
+    <string name="open_queue_success">打开打印队列成功</string>
+    <string name="open_queue_failed">打开打印队列失败</string>
+    <string name="open_queue_exception">打开打印队列异常：</string>
+    <string name="close_queue_success">关闭打印队列成功</string>
+    <string name="close_queue_failed">关闭打印队列失败</string>
+    <string name="close_queue_exception">关闭打印队列异常：</string>
+    <string name="barcode_type">码类型</string>
+    <string name="print">打印</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_test">TestActivity</string>
+    <string name="title_activity_print">票据打印</string>
 
 
 </resources>

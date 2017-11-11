@@ -1,5 +1,10 @@
 package com.myhand.common;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.SimpleFormatter;
+
 /**
  * Created by wenha_000 on 2017-09-07.
  */
@@ -61,4 +66,15 @@ public class Converter {
         return result;
     }
 
+    public static String dateFormatConvert(String dateStr){
+        SimpleDateFormat sdf1=new SimpleDateFormat("yyyyMMddHHmmss");
+        SimpleDateFormat sdf2=new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        try {
+            Date date=sdf1.parse(dateStr);
+            return sdf2.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return dateStr;
+        }
+    }
 }

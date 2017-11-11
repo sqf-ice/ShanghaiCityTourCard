@@ -135,7 +135,8 @@ public class CityCardQueryActivity extends BaseTourCardActivity {
                     return;
                 }
 
-                if(posDevice.debit(card,(int)debitAmount)==null)
+                //if(posDevice.debit(card,(int)debitAmount)==null)
+                if(posDevice.complexDebit(card,(int)debitAmount)==null)
                 {
                     mLogString.add(0,posDevice.getErrorMessage());
                 }else{
@@ -170,6 +171,7 @@ public class CityCardQueryActivity extends BaseTourCardActivity {
                 posDevice.getPsamDevice().setErrorMessage("PSAM卡打开失败:"+posDevice.getPsamDevice().getErrorMessage());
                 return;
             }
+
             //显示PSAM信息
             SHTCPsamCard psamCard=(SHTCPsamCard)posDevice.getPsamDevice().getPsamCard();
             String msg="PSAM ";

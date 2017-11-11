@@ -68,7 +68,8 @@ public class V8PsamDevice extends PSAMDevice {
     @Override
     public byte[] sendAPDU(byte[] apdu) {
         try {
-            byte[] ret = psam.sendApdu(apdu);
+            return psam.sendApdu(apdu);
+/*
             if(ret.length<2)
             {
                 setErrorMessage("返回值长度异常");
@@ -89,6 +90,7 @@ public class V8PsamDevice extends PSAMDevice {
             byte[] result=new byte[ret.length-2];
             System.arraycopy(ret,0,result,0,ret.length-2);
             return  result;
+*/
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

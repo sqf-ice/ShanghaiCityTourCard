@@ -6,6 +6,7 @@ package com.myhand.cpucard;
 
 import com.myhand.shtcdatafile.FHFileRecord;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -31,7 +32,7 @@ import java.util.List;
  CardVerNo	N2	卡内版本号	当作地域区分标志
 
  */
-public class DebitRecord {
+public class DebitRecord implements Serializable{
     private String corpID;
     private long localTxnSeq;
     private byte txnAttr;

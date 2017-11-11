@@ -15,12 +15,25 @@ import java.util.Date;
  */
 
 public abstract class POSDevice {
+    //错误代码
+    public static String EC_OK="0000";
+    public static String EC_NORESPONSE="1001";
+
+    public static String EC_PSAMERROR="8001";
+    public static String EC_RFERROR="8001";
+
+    public static String EC_VALIDATEDATE="9002";
+    public static String EC_BALANCE="9003";
+    public static String EC_TXNFAILURE="9004";
+
     //行业代码
     private byte tradeCode=32;
     //公司代码
     private String corpCode="00320000001";
     //公司名称
     private String corpName="SHANDE";
+    private String corpChinesename="上海秩城科技有限公司";
+
     //站点代码
     private String stationID="123456";
     //POS编码，来自于PSAM卡
@@ -33,8 +46,12 @@ public abstract class POSDevice {
     private PSAMDevice psamDevice;
     //用户卡（非接）操作设备
     private RFCPUDevice rfcpuDevice;
+    private Sounder sounder;
+    private Printer printer;
 
+    private String errorCode;
     private String errorMessage;
+
     //交易类型，取决于POS机设备
     private byte txnType=88;
     //设备流水号
@@ -60,6 +77,14 @@ public abstract class POSDevice {
         return corpCode;
     }
 
+    public String getCorpChinesename() {
+        return corpChinesename;
+    }
+
+    public void setCorpChinesename(String corpChinesename) {
+        this.corpChinesename = corpChinesename;
+    }
+
     public byte getTxnType() {
         return txnType;
     }
@@ -80,11 +105,24 @@ public abstract class POSDevice {
         this.corpName = corpName;
     }
 
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
     public String getErrorMessage() {
         return String.format("设备：%1$s PSAM:%2$s Card:%3$s",errorMessage,psamDevice.getErrorMessage(),rfcpuDevice.getErrorMessage());    }
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public void setError(String errorCode,String errorMessage){
+        this.errorCode=errorCode;
+        this.errorMessage=errorMessage;
     }
 
     public String getStationID() {
@@ -168,5 +206,19 @@ public abstract class POSDevice {
         return false;
     }
 
+    public Sounder getSounder() {
+        return sounder;
+    }
 
+    public void setSounder(Sounder sounder) {
+        this.sounder = sounder;
+    }
+
+    public Printer getPrinter() {
+        return printer;
+    }
+
+    public void setPrinter(Printer printer) {
+        this.printer = printer;
+    }
 }

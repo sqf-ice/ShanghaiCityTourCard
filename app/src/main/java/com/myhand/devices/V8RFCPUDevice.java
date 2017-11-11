@@ -70,9 +70,10 @@ public class V8RFCPUDevice extends RFCPUDevice{
 
     @Override
     public byte[] sendAPDU(byte[] apdu) {
-        byte[] ret = null;
+//        byte[] ret = null;
         try {
-            ret = rfCard.send(apdu);
+            return rfCard.send(apdu);
+/*
             if (null == ret) {
                 setErrorMessage("APDU执行失败："+HexUtil.bytesToHexString(apdu));
                 return null;
@@ -92,6 +93,7 @@ public class V8RFCPUDevice extends RFCPUDevice{
             byte[] result=new byte[ret.length-2];
             System.arraycopy(ret,0,result,0,ret.length-2);
             return  result;
+*/
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

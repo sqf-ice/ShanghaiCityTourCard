@@ -1,10 +1,12 @@
 package com.myhand.cpucard;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.centerm.smartpos.aidl.psam.AidlPsam;
 import com.centerm.smartpos.util.AidlErrorCode;
 import com.centerm.smartpos.util.HexUtil;
+import com.myhand.devices.CPUDevice;
 import com.myhand.devices.PSAMDevice;
 
 /**
@@ -13,6 +15,7 @@ import com.myhand.devices.PSAMDevice;
 
 //上海公交IC卡PSAM卡
 public class SHTCPsamCard extends PSAMCard{
+    private static final String tag=SHTCPsamCard.class.getSimpleName();
     //APDU指令
     public static final String APDUSel0016="00B0960000";
     public static final String APDUSelFile="00A40000021001";
@@ -48,7 +51,8 @@ public class SHTCPsamCard extends PSAMCard{
             return false;
         }
 
-        posNo=HexUtil.bytesToHexString(ret);
+        posNo=HexUtil.bytesToHexString(CPUDevice.getResponseData(ret));
+        Log.d(tag,String.format("PosNO:%s",posNo));
 
         return true;
     }

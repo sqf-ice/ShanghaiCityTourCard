@@ -24,7 +24,7 @@ import com.centerm.smartpos.util.LogUtil;
 public class BaseTourCardActivity extends AppCompatActivity {
     public AidlDeviceManager manager = null;
 
-    private Handler handler = new Handler() {
+    public Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             // TODO Auto-generated method stub

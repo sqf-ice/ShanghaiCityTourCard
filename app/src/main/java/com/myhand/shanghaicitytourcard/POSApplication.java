@@ -7,8 +7,10 @@ import android.util.Log;
 
 import com.myhand.POS.DatabaseSHCT;
 import com.myhand.common.AppDatabase;
+import com.myhand.cpucard.DebitRecord;
 import com.myhand.devices.DeviceV8;
 import com.myhand.devices.POSDevice;
+import com.myhand.devices.V8Printer;
 
 import java.io.File;
 
@@ -104,5 +106,16 @@ public class POSApplication extends Application{
     public String getDebitFilePath()
     {
         return dataPath+"/"+DIRDEBIT;
+    }
+
+    public boolean printPayNot(DebitRecord debitRecord){
+        V8Printer printer=(V8Printer) posDevice.getPrinter();
+        if(printer==null){
+            posDevice.setErrorMessage("没有找到打印机");
+            return false;
+        }
+
+        
+        return true;
     }
 }
