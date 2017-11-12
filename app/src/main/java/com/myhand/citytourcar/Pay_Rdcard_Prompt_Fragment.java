@@ -1,4 +1,4 @@
-package com.myhand.shanghaicitytourcard;
+package com.myhand.citytourcar;
 
 import android.content.Context;
 import android.net.Uri;
@@ -9,6 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.myhand.shanghaicitytourcard.PayFragment;
+import com.myhand.shanghaicitytourcard.R;
 
 
 /**

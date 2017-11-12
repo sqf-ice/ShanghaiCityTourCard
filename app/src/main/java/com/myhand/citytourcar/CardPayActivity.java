@@ -1,4 +1,4 @@
-package com.myhand.shanghaicitytourcard;
+package com.myhand.citytourcar;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -12,7 +12,6 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -23,17 +22,20 @@ import com.centerm.smartpos.aidl.rfcard.AidlRFCard;
 import com.centerm.smartpos.aidl.soundplayer.AidlSoundPlayer;
 import com.centerm.smartpos.aidl.sys.AidlDeviceManager;
 import com.centerm.smartpos.constant.Constant;
-import com.centerm.smartpos.util.HexUtil;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.devices.POSDevice;
-import com.myhand.devices.Printer;
 import com.myhand.devices.V8PsamDevice;
 import com.myhand.devices.V8RFCPUDevice;
 import com.myhand.devices.V8Sounder;
+import com.myhand.shanghaicitytourcard.BaseTourCardActivity;
+import com.myhand.shanghaicitytourcard.CityTourCard;
+import com.myhand.shanghaicitytourcard.POSApplication;
+import com.myhand.shanghaicitytourcard.PrintActivity;
+import com.myhand.shanghaicitytourcard.R;
 
 public class CardPayActivity extends BaseTourCardActivity
 implements Pay_Rdcard_Prompt_Fragment.OnFragmentInteractionListener,
-CardPayFragment.OnFragmentInteractionListener{
+        CardPayFragment.OnFragmentInteractionListener {
     private static final int SEQ_PRINTNOTE=1;
     //本机对应设备
     public POSDevice posDevice;
@@ -192,6 +194,8 @@ CardPayFragment.OnFragmentInteractionListener{
             }
 
             cardPayFragment.showBalance(card.getBalance());
+            cardPayFragment.ShowErrorMessage(0,String.format("卡类型：%02X，有效期：%s",
+                    card.getTypeIn05(),card.getFCIValidData().getValidDate()));
             loadFragment(1);
         }
     };
@@ -210,22 +214,67 @@ CardPayFragment.OnFragmentInteractionListener{
         @Override
         public void run() {
             super.run();
-            //卡支付
-            debitRecord=posDevice.complexDebit(card,debitAmount);
-            if(debitRecord==null){
-                handler.post(new Runnable(){
-                    @Override
-                    public void run() {
-                        cardPayFragment.ShowErrorMessage(1,posDevice.getErrorMessage());
+
+            while (true) {
+                //卡支付
+                debitRecord = posDevice.complexDebit(card, debitAmount);
+                if (debitRecord == null) {
+                    //检查是否需要重新做交易
+                    if(posDevice.getErrorCode().compareTo(POSDevice.EC_NORESPONSE)==0){
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                cardPayFragment.ShowErrorMessage(2, "交易重做......");
+                            }
+                        });
+/*
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+*/
+                        //重新读卡
+                        while (true) {
+                            card = posDevice.readCard();
+                            if(card!=null){
+                                break;
+                            }
+                        }
+                        continue;
                     }
-                });
-                return;
+
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            cardPayFragment.ShowErrorMessage(1, posDevice.getErrorMessage());
+                        }
+                    });
+                    return;
+                }
+                break;
             }
             //打印支付凭证
             Intent intent=new Intent();
             intent.setClass(CardPayActivity.this,PrintActivity.class);
             intent.putExtra("debitRecord",debitRecord);
             startActivityForResult(intent,SEQ_PRINTNOTE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode){
+            case SEQ_PRINTNOTE:{
+                //重新读卡显示卡余额
+                card=posDevice.readCard();
+                if(card!=null){
+                    cardPayFragment.showBalance(card.getBalance());
+                    cardPayFragment.setPayAmount(0);
+                }
+                break;
+            }
         }
     }
 

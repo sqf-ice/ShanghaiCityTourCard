@@ -24,6 +24,7 @@ import java.util.Date;
  */
 
 public class DeviceV8 extends POSDevice {
+    private static final String tag=DeviceV8.class.getSimpleName();
     @Override
     public boolean openPSAMCard() {
         if(getPsamDevice()==null
@@ -59,22 +60,33 @@ public class DeviceV8 extends POSDevice {
         int retVal = -1;
         if(!getRfcpuDevice().open())
         {
+            setError(EC_NORESPONSE,"RF Device Failure");
             return null;
         }
 
         retData = getRfcpuDevice().reset();
         if(retData==null){
             //卡复位失败
-            getRfcpuDevice().setErrorMessage("卡复位失败" );
+            setError(EC_NORESPONSE,"卡复位失败" );
             return null;
         }
         CityTourCard card=new CityTourCard(retData,getRfcpuDevice().readChipType());
 
+        //读取0x05文件
+        String apduRd05="00B0850000";
+        byte[] result=getRfcpuDevice().sendAPDU(HexUtil.hexStringToByte(apduRd05));
+        if(result==null){
+            setError(EC_NORESPONSE,String.format("读取0x05文件失败：%s",apduRd05));
+            return null;
+        }
+        Log.d(tag,String.format("05文件：%s卡类型：%02X",HexUtil.bytesToHexString(result),result[8]));
+        card.setTypeIn05(result[8]);
+
         //读取FCI数据，上海交通卡规范
-        byte[] result=getRfcpuDevice().sendAPDU(HexUtil.hexStringToByte(card.APDUSelFCIDATA));
+        result=getRfcpuDevice().sendAPDU(HexUtil.hexStringToByte(card.APDUSelFCIDATA));
         if(result==null)
         {
-            getRfcpuDevice().setErrorMessage("读取FCI数据失败");
+            setError(EC_NORESPONSE,String.format("读取FCI数据失败:%s",card.APDUSelFCIDATA));
             return null;
         }
         //设置FCI数据
@@ -84,7 +96,14 @@ public class DeviceV8 extends POSDevice {
 
         //取卡余额
         result=getRfcpuDevice().sendAPDU(HexUtil.hexStringToByte(card.APDUFETCHBALANCE));
+        if(result==null){
+            setError(EC_NORESPONSE,String.format("获取卡余额失败：%s",card.APDUFETCHBALANCE));
+            return null;
+        }
         byte[] balance=CPUDevice.getResponseData(result);
+        Log.d(tag,String.format("卡余额:apdu:%s Result:%s balance:%d",card.APDUFETCHBALANCE,HexUtil.bytesToHexString(balance),
+                Converter.BytesToLong(balance)));
+
         card.setByteBalance(balance);
 
         //读取用户卡认证码
@@ -232,7 +251,7 @@ public class DeviceV8 extends POSDevice {
             return null;
         }
         byte[] cardNum=((CityTourCard)userCard).getFCIValidData().getCardNo();
-        byte[] verifiedCode=readCard().getVerifyCode();
+        byte[] verifiedCode=((CityTourCard)userCard).getVerifyCode();
 
         //SAM卡选1001目录
         String apduPSAMSel001="00A40000021001";
@@ -276,7 +295,8 @@ public class DeviceV8 extends POSDevice {
             return null;
         }
         byte[] balance=CPUDevice.getResponseData(ret);
-        Log.d(tag,"卡余额:apdu="+apduUserCard+" Result="+HexUtil.bytesToHexString(balance));
+        Log.d(tag,String.format("卡余额:apdu:%s Result:%s balance:%d",apduUserCard,HexUtil.bytesToHexString(balance),
+            Converter.BytesToLong(balance)));
 
         //SAM卡选1001目录
         String apduPSAM="00A40000021001";
@@ -396,6 +416,9 @@ public class DeviceV8 extends POSDevice {
         int pos=0;
         System.arraycopy(ret,pos,balance,0,4);
         pos+=4;
+        ((CityTourCard) userCard).setByteBalance(balance);
+        Log.d(tag,String.format("apdu:%s result:%s 卡余额：%d",apduUserCardTxnBegin,HexUtil.bytesToHexString(ret),
+                Converter.BytesToLong(balance)));
         byte[] cardSeq=new byte[2];
         System.arraycopy(ret,pos,cardSeq,0,2);
         pos+=2;

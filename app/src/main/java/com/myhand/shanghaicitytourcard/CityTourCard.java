@@ -10,6 +10,7 @@ import com.myhand.cpucard.SHTCCPUUserCard;
 
 public class CityTourCard extends SHTCCPUUserCard {
 
+
     public CityTourCard(){
 
     }

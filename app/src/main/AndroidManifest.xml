@@ -126,7 +126,7 @@
             android:label="@string/title_activity_text_view"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".CardPayActivity"
+            android:name="com.myhand.citytourcar.CardPayActivity"
             android:label="@string/title_activity_card_pay"
             android:parentActivityName=".BaseTourCardActivity"
             android:theme="@style/AppTheme.NoActionBar"
@@ -138,6 +138,10 @@
         <activity
             android:name=".PrintActivity"
             android:label="@string/title_activity_print"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name="com.myhand.manage.SettleActivity"
+            android:label="@string/title_activity_settle"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

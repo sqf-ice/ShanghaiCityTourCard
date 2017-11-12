@@ -327,7 +327,7 @@ public class PrintActivity extends BaseTourCardActivity {
     }
 
     // 初始化打印参数
-    public void initPrinter(View v) {
+    public void initPrinter() {
         // begin 017/03/09 14:11 子线程，防止有多个打印任务时点击初始化参数出现anr现象
         // wengtao@centerm.com
         new Thread(new Runnable() {
@@ -394,12 +394,15 @@ public class PrintActivity extends BaseTourCardActivity {
             }
 
             try {
-                printDev.spitPaper(headHigh);
+                //printDev.spitPaper(headHigh);
                 printDev.printText(listPrint,callback);
-                printDev.spitPaper(tailHight);
+                //printDev.spitPaper(tailHight);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
+            setResult(1);
+            finish();
+            //getPrintState();
         }
     };
     // 倍高

@@ -3,6 +3,7 @@ package com.myhand.control;
 import android.content.Context;
 import android.content.Intent;
 import android.database.DataSetObserver;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import com.centerm.smartpos.util.HexUtil;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.cpucard.SHTCCPUUserCard;
+import com.myhand.shanghaicitytourcard.POSApplication;
 import com.myhand.shanghaicitytourcard.R;
 import com.myhand.shanghaicitytourcard.TextViewActivity;
 import com.myhand.shtcdatafile.FHFileRecord;
@@ -112,7 +114,13 @@ public class DebitQueryAdapter extends BaseAdapter {
         }
 
         final DebitRecord record=listDebit.get(position);
+        //根据状态设定流水号字体颜色
         holder.textViewLocalSeg.setText(String.format("本地流水：%d",record.getLocalTxnSeq()));
+        if(record.getStatus()==0x00) {
+            holder.textViewLocalSeg.setTextColor(POSApplication.instance.getResources().getColor(R.color.red));
+        }else{
+            holder.textViewLocalSeg.setTextColor(POSApplication.instance.getResources().getColor(R.color.black));
+        }
         holder.textViewCardNo.setText("卡面号："+
                 SHTCCPUUserCard.CardFaceNum(HexUtil.hexStringToByte((record.getCardFaceNum().substring(8)))));
 

@@ -24,6 +24,7 @@ public class SHTCCPUUserCard extends CPUUserCard{
 
     //卡类型
     private byte cardType;
+    private byte typeIn05;
     //卡有效期
     private Date validateDate;
     //密钥版本
@@ -41,6 +42,15 @@ public class SHTCCPUUserCard extends CPUUserCard{
     {
 
     }
+
+    public byte getTypeIn05() {
+        return typeIn05;
+    }
+
+    public void setTypeIn05(byte typeIn05) {
+        this.typeIn05 = typeIn05;
+    }
+
     public byte getKeyVersion() {
         return keyVersion;
     }

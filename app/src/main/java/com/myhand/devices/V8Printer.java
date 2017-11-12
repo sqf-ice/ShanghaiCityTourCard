@@ -73,6 +73,53 @@ public class V8Printer extends Printer{
         result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
         result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
         result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
+
+        //客户联
+        result.add(new PrintDataObject("欢  迎  使  用", 40,true
+                , PrintDataObject.ALIGN.CENTER));
+        result.add(new PrintDataObject("上海都市旅游卡", 40,true
+                , PrintDataObject.ALIGN.CENTER));
+        result.add(new PrintDataObject("-------------------------------", 24,
+                true, PrintDataObject.ALIGN.CENTER));
+        result.add(new PrintDataObject("持卡人联", 34,
+                true, PrintDataObject.ALIGN.RIGHT));
+        result.add(new PrintDataObject(posDevice.getCorpChinesename(), 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("", 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("行业代码：%d",posDevice.getTradeCode()), 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("终端号：%s",debitRecord.getPosID()), 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("公司号：%s",debitRecord.getCorpID()), 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("-------------------------------", 24,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("小额消费", 24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("卡号：U%s",
+                SHTCCPUUserCard.CardFaceNum(HexUtil.hexStringToByte(debitRecord.getCardFaceNum().substring(8)))),
+                24,true, PrintDataObject.ALIGN.LEFT));
+
+        result.add(new PrintDataObject(String.format("时间：%s", Converter.dateFormatConvert(debitRecord.getTxnTime())),
+                24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("批次：%d流水：%d",debitRecord.getLocalTxnSeq(),debitRecord.getLocalTxnSeq()),
+                24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("有效期：%s",Converter.dateFormatConvert(debitRecord.getTxnTime())),
+                24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("消费前余额：%.2f",(float)debitRecord.getBalanceBef()/100.0),
+                24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("消费金额：%.2f",(float)debitRecord.getAmount()/100.0),
+                24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("消费后余额：%.2f",(float)(debitRecord.getBalanceBef()-debitRecord.getAmount())/100.0),
+                24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("-------------------------------", 24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("MO14-GP", 24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
         return result;
     }
 }

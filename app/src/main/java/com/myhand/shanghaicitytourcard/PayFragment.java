@@ -2,6 +2,8 @@ package com.myhand.shanghaicitytourcard;
 
 import android.app.Fragment;
 
+import com.myhand.citytourcar.CardPayActivity;
+
 /**
  * Created by vincent on 2017/11/11.
  */

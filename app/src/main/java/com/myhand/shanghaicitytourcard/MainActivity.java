@@ -15,15 +15,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.myhand.POS.DatabaseSHCT;
+import com.myhand.citytourcar.CardPayActivity;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.devices.DataExchangeService;
+import com.myhand.manage.SettleActivity;
+import com.myhand.manage.SettleFragment;
 import com.myhand.shtcdatafile.FHFileRecord;
 import com.myhand.shtcdatafile.SHTCClient;
 
 public class MainActivity extends AppCompatActivity {
     private String tag=MainActivity.class.getSimpleName();
     public static final int CardQuery=1;
-    public static final int SendData=2;
+    public static final int REQ_Settle=2;
     public static final int DebitQuery=3;
     public static final int Login=4;
     // Used to load the 'native-lib' library on application startup.
@@ -85,8 +88,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent();
-                intent.setClass(MainActivity.this,SendDataActivity.class);
-                startActivityForResult(intent,SendData);
+                intent.setClass(MainActivity.this,SettleActivity.class);
+                startActivityForResult(intent,REQ_Settle);
             }
         });
 

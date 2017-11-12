@@ -1,4 +1,4 @@
-package com.myhand.shanghaicitytourcard;
+package com.myhand.citytourcar;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -11,6 +11,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.centerm.smartpos.util.HexUtil;
+import com.myhand.shanghaicitytourcard.CityTourCard;
+import com.myhand.shanghaicitytourcard.PayFragment;
+import com.myhand.shanghaicitytourcard.R;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 /**
@@ -81,6 +90,32 @@ public class CardPayFragment extends PayFragment {
             @Override
             public void onClick(View v) {
                 ShowErrorMessage(0,"");
+                CityTourCard card= getPayActivity().card;
+                if(card==null){
+                    ShowErrorMessage(1,"请刷卡......");
+                    return;
+                }
+                //卡类型判断
+                if(card.getTypeIn05()<0x48||card.getTypeIn05()>0x72){
+                    ShowErrorMessage(1,String.format("不支持卡类型在（0x48~0x72）之外的卡消费，当前卡类型为：%02X",card.getTypeIn05()));
+                    return;
+                }
+                //卡有效期判断
+                String valideDateStr=HexUtil.bytesToHexString(card.getFCIValidData().getValidDate());
+                SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMdd");
+                try {
+                    Date valideDate=sdf.parse(valideDateStr);
+                    Date now=new Date();
+                    if(valideDate.compareTo(now)<0){
+                        ShowErrorMessage(1,String.format("过有效期，请去续期"));
+                        return;
+                    }
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    ShowErrorMessage(1,String.format("有效期转换失败：%s",e.getLocalizedMessage()));
+                    return;
+                }
+
                 String payAmountStr=editTextPayAmount.getText().toString();
                 if(payAmountStr.isEmpty()){
                     ShowErrorMessage(1,"请输入消费金额");
@@ -123,7 +158,12 @@ public class CardPayFragment extends PayFragment {
     public void showBalance(int amount){
         if(textViewBalance!=null) {
             textViewBalance.setText(String.format("%.2f", (float) amount / 100.0));
+            textViewBalance.setText(String.format("%d",amount));
         }
+    }
+
+    public void setPayAmount(int amount){
+        editTextPayAmount.setText(String.format("%d",amount));
     }
 
     public float getPayAmount(){
@@ -171,6 +211,11 @@ public class CardPayFragment extends PayFragment {
         super.onResume();
         if(getPayActivity().card!=null) {
             showBalance(getPayActivity().card.getBalance());
+            if(getPayActivity().card!=null) {
+                ShowErrorMessage(0,String.format("卡类型：%02X 有效期：%s",
+                        getPayActivity().card.getFCIValidData().getCardType(),
+                        HexUtil.bytesToHexString(getPayActivity().card.getFCIValidData().getValidDate())));
+            }
         }
     }
 
@@ -193,10 +238,16 @@ public class CardPayFragment extends PayFragment {
                 color= Color.rgb(0xFF,0x00,0x00);
                 break;
             }
+            default:{
+                color=Color.rgb(0x00,0x00,0xFF);
+                break;
+            }
         }
 
-        textViewErrorMessage.setTextColor(color);
-        textViewErrorMessage.setText(errorMessage);
+        if(textViewErrorMessage!=null) {
+            textViewErrorMessage.setTextColor(color);
+            textViewErrorMessage.setText(errorMessage);
+        }
     }
 
     /**

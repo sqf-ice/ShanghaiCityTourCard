@@ -79,7 +79,7 @@ public class SHTCPsamCard extends PSAMCard{
         {
             return false;
         }
-        keyVersion=HexUtil.bytesToHexString(ret);
+        keyVersion=HexUtil.bytesToHexString(CPUDevice.getResponseData(ret));
         return true;
     }
 }
