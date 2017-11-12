@@ -9,6 +9,7 @@ import android.util.Log;
 import com.centerm.smartpos.util.HexUtil;
 import com.myhand.common.AppDatabase;
 import com.myhand.cpucard.DebitRecord;
+import com.myhand.manage.SettleSum;
 import com.myhand.shtcdatafile.FHFileUploadInfo;
 
 import java.sql.SQLData;
@@ -28,6 +29,77 @@ public class DatabaseSHCT extends AppDatabase{
     private String tbBlkCard="TBBlackCard";
     private String TBDebit="TBDebit";
 
+    /**
+     * 结算表
+     */
+    private String tbSettle="TBSettle";
+    private String sqlCreateTBSettle=String.format("Create Table %s(\n"
+            +"id integer primary key autoincrement,\n"
+            +"PatchNo integer not null default 0,\n"
+            +"SettleTime date not null default now,\n"
+            +"Username varchar2(20) not null,\n"
+            +"CorpID varchar2(20) not null,\n"
+            +"PosID varchar2(20) not null,\n"
+            +"count integer not null default 0,\n"
+            +"sum integer not null default 0,\n"
+            +"starttime date not null,\n"
+            +"endtime date not null)",tbSettle);
+
+    /**
+     * @param settleSum
+     * @return
+    result+=String.format("strftime(%s))",sdf.format(debitRecord.getLastUploadTime()));
+
+     */
+    public boolean insertSettle(SettleSum settleSum){
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        String sqlInsert=String.format("Insert into %s values(\n"
+                +"null,%d,strftime('%s'),'%s','%s','%s',"
+                +"%d,%d,"
+                +"strftime('%s'),strftime('%s'))"
+                ,tbSettle
+                ,settleSum.getPatchNo(),sdf.format(settleSum.getSettleTime()),settleSum.getCorpID(),settleSum.getPosID()
+                ,settleSum.getCount(),settleSum.getSum()
+                ,sdf.format(settleSum.getStartTime()),sdf.format(settleSum.getEndTime()));
+
+        return ExecCommand(sqlInsert);
+    }
+
+    /**
+     * 用户表
+     */
+    private String tbUser="TBUser";
+    private String sqlCreateTBUser=String.format("Create Table %s(\n"
+            +"username varchar2(20) not null primary key,\n"
+            +"password varchar2(20) not null,\n"
+            +"roleID integer not null default 0,\n"
+            +"status integer not null default 0)",tbUser);
+
+    public boolean insertUser(User user){
+        String sqlInsert=String.format("Insert into %s values('%s','%s',%d,%d)",
+                tbUser,user.getUsername(),user.getPassword(),user.getReloID(),user.getStatus());
+        return ExecCommand(sqlInsert);
+    }
+
+    public User userLogin(String username,String password){
+        String sqlSelectUser=String.format("Select * from %s\n"
+                +"where username='%s' and password='%s' and status>0",tbUser,username,password);
+
+        Cursor cursor=ExecQuery(sqlSelectUser);
+        if(cursor==null||cursor.getCount()==0){
+            return null;
+        }
+
+        cursor.moveToFirst();
+        User result=new User();
+        result.setUsername(cursor.getString(0));
+        result.setPassword(cursor.getString(1));
+        result.setReloID(cursor.getInt(2));
+        result.setStatus(cursor.getInt(3));
+
+        return result;
+    }
     /**
      * 消费文件注册信息表
      */

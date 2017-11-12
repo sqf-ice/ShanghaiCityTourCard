@@ -61,10 +61,6 @@ public class MainActivity extends AppCompatActivity {
             Log.d(tag,"Service start OK,name:"+name.getShortClassName());
         }
 
-        // Example of a call to a native method
-        TextView tv = (TextView) findViewById(R.id.sample_text);
-        tv.setText(stringFromJNI());
-
         Button btnLogin=(Button)findViewById(R.id.buttonLogin) ;
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+/*
         Button btnFHFileUploadInfo=(Button)findViewById(R.id.buttonUploadFileInfo) ;
         btnFHFileUploadInfo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent,4);
             }
         });
+*/
 
         //测试黑名单卡数据库
         POSApplication application=(POSApplication)getApplication();

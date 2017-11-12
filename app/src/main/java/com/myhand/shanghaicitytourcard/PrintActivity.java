@@ -30,6 +30,7 @@ import com.centerm.smartpos.constant.DeviceErrorCode;
 import com.centerm.smartpos.util.LogUtil;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.devices.V8Printer;
+import com.myhand.manage.SettleSum;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,6 +68,8 @@ public class PrintActivity extends BaseTourCardActivity {
     }
 
     private DebitRecord debitRecord;
+    private SettleSum settleSum;
+
     private Dialog dialog;
     private AidlPrinter printDev = null;
     // 打印机回调对象
@@ -115,9 +118,7 @@ public class PrintActivity extends BaseTourCardActivity {
     private void getPrintData(){
         Intent intent=getIntent();
         debitRecord=(DebitRecord) intent.getSerializableExtra("debitRecord");
-        if(debitRecord==null){
-            Toast.makeText(this,"No debit record laod",Toast.LENGTH_SHORT).show();
-        }
+        settleSum=(SettleSum) intent.getSerializableExtra("SettleSum");
     }
 
     private void getMessStr(int ret) {
@@ -538,6 +539,9 @@ public class PrintActivity extends BaseTourCardActivity {
             dialog.dismiss();
             if(debitRecord!=null) {
                 new ThreadPrintNote(V8Printer.printPayNote(debitRecord)).start();
+            }
+            if(settleSum!=null){
+                new ThreadPrintNote(V8Printer.printSettleNote(settleSum)).start();
             }
         } catch (RemoteException e) {
             e.printStackTrace();

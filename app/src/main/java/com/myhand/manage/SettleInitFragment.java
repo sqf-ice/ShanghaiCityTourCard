@@ -117,7 +117,7 @@ public class SettleInitFragment extends SettleFragment {
     public void onResume() {
         super.onResume();
         if(textViewSettleSum!=null){
-            SettleSum sum=getSettleActivity().sumDebit();
+            SettleSum sum=getSettleActivity().currSettleSum;
             textViewSettleSum.setText(String.format("消费总笔数：%d 总金额：%.2f元",sum.getCount(),(float)sum.getSum()/100f));
         }
     }

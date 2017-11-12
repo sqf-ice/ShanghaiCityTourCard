@@ -390,7 +390,7 @@ public class SHTCClient {
                 return;
             }
 
-            ShowMessage(0,String.format("共成功上传了%d条消费交易。",uploadcount));
+            ShowMessage(10,String.format("共成功上传了%d条消费交易。",uploadcount));
         }
 
 
@@ -433,6 +433,9 @@ public class SHTCClient {
         DatabaseSHCT db=application.getAppDatabase();
         transStatus=TRANS_STATUS_REQUEST;
         long sendSeq=db.getPosSendSequence(application.getPosDevice().getPosID()) ;
+        //保存当前批次号
+        POSApplication.instance.getPosDevice().setPatchNo((int)sendSeq);
+
         DGCommHead head=new DGCommHead();
         head.setSendSeq((int)sendSeq);
         head.setFileSize(count);

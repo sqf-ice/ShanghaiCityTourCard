@@ -15,6 +15,10 @@ import java.util.Date;
  */
 
 public abstract class POSDevice {
+    public static String IPTEST="168.10.5.96";
+    public static int portUp=12581;
+    public static int portDown=12582;
+
     //错误代码
     public static String EC_OK="0000";
     public static String EC_NORESPONSE="1001";
@@ -33,7 +37,8 @@ public abstract class POSDevice {
     //公司名称
     private String corpName="SHANDE";
     private String corpChinesename="上海秩城科技有限公司";
-
+    //批次号
+    private int patchNo;
     //站点代码
     private String stationID="123456";
     //POS编码，来自于PSAM卡
@@ -83,6 +88,14 @@ public abstract class POSDevice {
 
     public void setCorpChinesename(String corpChinesename) {
         this.corpChinesename = corpChinesename;
+    }
+
+    public int getPatchNo() {
+        return patchNo;
+    }
+
+    public void setPatchNo(int patchNo) {
+        this.patchNo = patchNo;
     }
 
     public byte getTxnType() {

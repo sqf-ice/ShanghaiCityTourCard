@@ -37,6 +37,8 @@ public class SendDataFragment extends SettleFragment {
     private TextView textViewSendInfo;
     private TextView textViewConnectStatus;
 
+    String msg[]=new String[]{"","",""};
+
     private OnFragmentInteractionListener mListener;
 
     public SendDataFragment() {
@@ -93,7 +95,7 @@ public class SendDataFragment extends SettleFragment {
                     color = getActivity().getResources().getColor(R.color.black);
                     break;
                 }
-                case 1: {
+                default: {
                     color = getActivity().getResources().getColor(R.color.red);
                     break;
                 }
@@ -101,17 +103,21 @@ public class SendDataFragment extends SettleFragment {
         }
         switch (index){
             case 0:{
-                //textViewConnectStatus.setTextColor(color);
+                msg[0]=messageText;
+                textViewConnectStatus.setTextColor(color);
                 textViewConnectStatus.setText(messageText);
                 break;
             }
             case 1:{
-                //textViewSendInfo.setTextColor(color);
+                msg[1]=messageText;
+
+                textViewSendInfo.setTextColor(color);
                 textViewSendInfo.setText(messageText);
                 break;
             }
             case 2:{
-                //textViewSendResult.setTextColor(color);
+                msg[2]=messageText;
+                textViewSendResult.setTextColor(color);
                 textViewSendResult.setText(messageText);
                 break;
             }
@@ -127,7 +133,9 @@ public class SendDataFragment extends SettleFragment {
     @Override
     public void onResume() {
         super.onResume();
-        textViewSendResult.setText("Test");
+        textViewSendResult.setText(msg[2]);
+        textViewSendInfo.setText(msg[1]);
+        textViewConnectStatus.setText(msg[0]);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

@@ -11,10 +11,13 @@ import com.centerm.smartpos.util.HexUtil;
 import com.myhand.common.Converter;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.cpucard.SHTCCPUUserCard;
+import com.myhand.manage.SettleSum;
 import com.myhand.shanghaicitytourcard.POSApplication;
 import com.myhand.shanghaicitytourcard.R;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -120,6 +123,50 @@ public class V8Printer extends Printer{
         result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
         result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
         result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
+        return result;
+    }
+
+    public static List<PrintDataObject> printSettleNote(SettleSum settleSum){
+        List<PrintDataObject> result=new ArrayList<PrintDataObject>();
+        result.add(new PrintDataObject("上海都市旅游卡业务结算单", 40,true
+                , PrintDataObject.ALIGN.CENTER));
+        result.add(new PrintDataObject("-------------------------------", 24,
+                true, PrintDataObject.ALIGN.CENTER));
+        POSDevice posDevice=POSApplication.instance.getPosDevice();
+        result.add(new PrintDataObject(posDevice.getCorpChinesename(), 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("", 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("行业代码：%d",posDevice.getTradeCode()), 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("终端号：%s",settleSum.getPosID()), 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("公司号：%s",posDevice.getCorpCode()), 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("批次号：%d",posDevice.getPatchNo()), 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("消费总笔数：%d",settleSum.getCount()), 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("消费总金额：%.2f",(float)settleSum.getSum()/100f), 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        //测试用
+        if(settleSum.getStartTime()==null){
+            settleSum.setStartTime(new Date());
+        }
+        if(settleSum.getEndTime()==null){
+            settleSum.setEndTime(new Date());
+        }
+        result.add(new PrintDataObject(String.format("起始：%s",sdf.format(settleSum.getStartTime())), 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject(String.format("结束：%s",sdf.format(settleSum.getEndTime())), 30,
+                true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("-------------------------------", 24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("MO14-GP", 24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
+        result.add(new PrintDataObject("", 24,true, PrintDataObject.ALIGN.LEFT));
+
         return result;
     }
 }
