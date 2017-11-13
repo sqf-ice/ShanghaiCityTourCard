@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.myhand.POS.DatabaseSHCT;
+import com.myhand.POS.User;
 import com.myhand.common.AppDatabase;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.devices.DeviceV8;
@@ -19,6 +20,7 @@ import java.io.File;
  */
 
 public class POSApplication extends Application{
+    private User user;
     private DatabaseSHCT appDatabase;
     private POSDevice posDevice;
     private static final String tag="V8App";
@@ -38,6 +40,14 @@ public class POSApplication extends Application{
 
         posDevice=new DeviceV8();
         initDataPath();
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getDataPath() {

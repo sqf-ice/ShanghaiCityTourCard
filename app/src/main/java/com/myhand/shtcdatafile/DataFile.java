@@ -1,7 +1,14 @@
 package com.myhand.shtcdatafile;
 
+import android.util.Log;
+
+import com.myhand.shanghaicitytourcard.POSApplication;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +18,7 @@ import java.util.List;
  */
 
 public class DataFile {
+    private static final String tag=DataFile.class.getSimpleName();
     private FileName fileName;
     private FileDescription description;
     private List<FileRecord> recordList;
@@ -61,6 +69,55 @@ public class DataFile {
         } catch (IOException e) {
             e.printStackTrace();
             return false;
+        }
+        return true;
+    }
+
+    public static boolean parseBLFile(String path,String filename){
+        File file=new File(path,filename);
+        if(!file.exists()){
+            Log.d(tag,String.format("BL File %s/%s  not exist.",path,filename));
+            return false;
+        }
+
+        //读取文件头
+        BLFileDescription blFileDescription=new BLFileDescription();
+        byte[] buffer=new byte[blFileDescription.getDataFieldLength()];
+        try {
+            FileInputStream inputStream = new FileInputStream(file);
+            if(inputStream.read(buffer)!=buffer.length){
+                inputStream.close();
+                Log.d(tag,String.format("BL file size error"));
+                return false;
+            }
+            blFileDescription.setData(new String(buffer));
+            if(!blFileDescription.isValid()){
+                inputStream.close();
+                Log.d(tag,String.format("BL file %s not a valid BL file",filename));
+                return false;
+            }
+            int count=blFileDescription.getCount();
+            int recordLength=blFileDescription.getRecordLength();
+
+            buffer=new byte[recordLength];
+            BLFileRecord blFileRecord=new BLFileRecord();
+            for(int i=0;i<count;i++){
+                if(inputStream.read(buffer)!=buffer.length){
+                    inputStream.close();
+                    Log.d(tag,String.format("Read BL record failure"));
+                    return  false;
+                }
+                blFileRecord.setData(new String(buffer));
+                if(!POSApplication.instance.getAppDatabase().insertBlkCard(blFileRecord.getCardNum(),blFileRecord.getLevel())){
+                    Log.d(tag,String.format("Insert BL card %s level %d failure.",blFileRecord.getCardNum(),blFileRecord.getLevel()));
+                }
+            }
+
+            inputStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return true;
     }

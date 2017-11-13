@@ -1,6 +1,8 @@
 package com.myhand.shanghaicitytourcard;
 
+import android.app.AlertDialog;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -75,6 +77,22 @@ public class MainActivity extends AppCompatActivity {
         btnCardQuery.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(POSApplication.instance.getUser()==null){
+                    final AlertDialog.Builder normalDialog =
+                            new AlertDialog.Builder(MainActivity.this);
+                    //normalDialog.setIcon(R.drawable.);
+                    normalDialog.setTitle("登录提示");
+                    normalDialog.setMessage(String.format("目前没有登录，请先登录。如果不知道登录账户，请与管理员联系"));
+                    normalDialog.setPositiveButton("确定",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            });
+                    // 显示
+                    normalDialog.show();
+                    return;
+                }
                 startDebit();
             }
         });
@@ -115,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         POSApplication application=(POSApplication)getApplication();
 
         DatabaseSHCT db=application.getAppDatabase();
-        db.insertBlkCard("123");
+        db.insertBlkCard("123",1);
         if(!db.isBlackCard("123"))
         {
             Log.d(tag,"Black Card Find Failure");
@@ -130,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
         //testRecord();
     }
+
 
     private void testRecord(){
         DebitRecord record=new DebitRecord("00320000001",1,(byte)80,"123456","100001","1234",

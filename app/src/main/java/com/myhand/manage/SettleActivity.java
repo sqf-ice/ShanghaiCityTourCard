@@ -211,6 +211,24 @@ SendDataFragment.OnFragmentInteractionListener{
         }
     }
 
+    public class ThreadDownloadData extends Thread{
+        @Override
+        public void run() {
+            super.run();
+            //初始化连接
+            SHTCClient client=new SHTCClient(POSDevice.IPTEST,POSDevice.portDown);
+            client.setHandler(handler);
+            //连接服务器
+            while (true){
+                if(client.Connect()){
+                    break;
+                }
+            }
+            //下载数据
+            new Thread(client.runnableSendDebitRecord).start();
+        }
+    }
+
     @Override
     public void onFragmentInteraction(Uri uri) {
 

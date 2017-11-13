@@ -43,8 +43,6 @@ public abstract class POSDevice {
     private String stationID="123456";
     //POS编码，来自于PSAM卡
     private String posID="12345678";
-    //操作用户
-    private User user;
     //数据保存目录
     private String workDataPath;
     //PSAM卡操作设备
@@ -146,14 +144,6 @@ public abstract class POSDevice {
         this.stationID = stationID;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public int getPosSequence() {
         return posSequence;
     }
@@ -180,7 +170,6 @@ public abstract class POSDevice {
     public abstract DebitRecord complexDebit(CPUUserCard userCard,int amount);
     public POSDevice() {
         posSequence=0;
-        user=new User("123456","111111");
     }
 
     public PSAMDevice getPsamDevice() {

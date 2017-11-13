@@ -94,7 +94,7 @@ public class FHFileRecord extends FileRecord {
         // 此处现简单增加
 
         DtlRecCPU dtlRecCPU=new DtlRecCPU(HexUtil.hexStringToByte(record.getCardFaceNum()),
-                HexUtil.hexStringToByte(record.getPosID()),
+                record.getTxnAttr(),HexUtil.hexStringToByte(record.getPosID()),
                 record.getPosSeq());
         addTsData(dtlRecCPU);
     }

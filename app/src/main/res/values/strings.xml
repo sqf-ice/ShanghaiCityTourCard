@@ -102,6 +102,7 @@
     <string name="title_activity_test">TestActivity</string>
     <string name="title_activity_print">票据打印</string>
     <string name="title_activity_settle">结算</string>
+    <string name="title_activity_admin">设备管理</string>
 
 
 </resources>

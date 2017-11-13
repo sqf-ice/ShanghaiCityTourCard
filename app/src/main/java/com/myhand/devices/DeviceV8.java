@@ -214,7 +214,7 @@ public class DeviceV8 extends POSDevice {
                 0,
                 txnAttr,
                 getStationID(),
-                getUser().getUserID(),
+                POSApplication.instance.getUser().getUsername(),
                 "0",//无公交车编号
                 getTxnType(),
                 (int)Converter.BytesToLong(posSeq),
@@ -520,7 +520,7 @@ public class DeviceV8 extends POSDevice {
                 0,
                 (byte) 0x09,
                 getStationID(),
-                getUser().getUserID(),
+                POSApplication.instance.getUser().getUsername(),
                 "0",//无公交车编号
                 getTxnType(),
                 (int)Converter.BytesToLong(posSeq1),

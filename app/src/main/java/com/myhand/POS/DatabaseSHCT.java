@@ -162,6 +162,16 @@ public class DatabaseSHCT extends AppDatabase{
         {
             Log.d(tag,"创建POS信息表失败");
         }
+
+        if(!ExecCommand(sqlCreateTBUser)){
+            Log.d(tag,"Create User Table failure");
+        }
+        User user=new User("admin","123456",1,1);
+        insertUser(user);
+        user=new User("1001","123456",0,1);
+        insertUser(user);
+
+        ExecCommand(sqlCreateTBSettle);
     }
 
     public static final String TB_PosInfo="TBPosInfo";
@@ -225,6 +235,7 @@ public class DatabaseSHCT extends AppDatabase{
 
      */
     private static final String SQLCreatTableBLKCARD="Create Table TBBlackCard(CardNO varchar(20) primary key,"
+            +"level int not null,"
             +"Status int not null default 1,"
             +"UpdateTime datetime not null default now)";
 
@@ -275,9 +286,9 @@ public class DatabaseSHCT extends AppDatabase{
      * @param cardNo
      * @return
      */
-    public boolean insertBlkCard(String cardNo)
+    public boolean insertBlkCard(String cardNo,int level)
     {
-        String sqlInsert=String.format("Insert into TBBlackCard(CardNo) values('%s')",cardNo);
+        String sqlInsert=String.format("Insert into TBBlackCard(CardNo,Level) values('%s',%d)",cardNo,level);
         if(!ExecCommand(sqlInsert))
         {
             Log.d(tag,"Insert black card "+cardNo+" failure.");

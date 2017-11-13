@@ -158,7 +158,7 @@ public class CardPayFragment extends PayFragment {
     public void showBalance(int amount){
         if(textViewBalance!=null) {
             textViewBalance.setText(String.format("%.2f", (float) amount / 100.0));
-            textViewBalance.setText(String.format("%d",amount));
+            //textViewBalance.setText(String.format("%d",amount));
         }
     }
 

@@ -392,8 +392,6 @@ public class SHTCClient {
 
             ShowMessage(10,String.format("共成功上传了%d条消费交易。",uploadcount));
         }
-
-
     };
 
     private boolean sendTailData(int count,int sum){
