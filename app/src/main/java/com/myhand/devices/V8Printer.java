@@ -26,6 +26,15 @@ import java.util.List;
 
 public class V8Printer extends Printer{
     private AidlPrinter printDev = null;
+
+    public AidlPrinter getPrintDev() {
+        return printDev;
+    }
+
+    public void setPrintDev(AidlPrinter printDev) {
+        this.printDev = printDev;
+    }
+
     // 打印机回调对象
     public static List<PrintDataObject> printPayNote(DebitRecord debitRecord){
         POSDevice posDevice=POSApplication.instance.getPosDevice();

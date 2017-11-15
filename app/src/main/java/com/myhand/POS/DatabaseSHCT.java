@@ -305,7 +305,9 @@ public class DatabaseSHCT extends AppDatabase{
      */
     public boolean isBlackCard(String cardNo)
     {
-        String sqlSelect=String.format("Select * from %s where CardNo='%s'",tbBlkCard,cardNo);
+        String sqlSelect=String.format("Select * from %s where CardNo='%s' and level>0",tbBlkCard,cardNo.substring(0,10));
+        Log.d(tag,String.format("Check if a black card:%s",sqlSelect));
+
         Cursor cursor= ExecQuery(sqlSelect);
         if(cursor.getCount()==0)
         {

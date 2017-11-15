@@ -232,7 +232,7 @@ public class CityCardQueryActivity extends BaseTourCardActivity {
 
             V8PsamDevice psamDevice=new V8PsamDevice();
             psamDevice.setPsam(psam1);
-            posDevice.setPsamDevice(psamDevice);
+            posDevice.setCurrPsamDevice(psamDevice);
 
             mLogString.add(mLogString.size(),"非接设备成功连接，开始进行卡设备操作......");
             V8RFCPUDevice v8RFCPUDevice=new V8RFCPUDevice();

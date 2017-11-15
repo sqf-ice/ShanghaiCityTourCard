@@ -13,22 +13,24 @@ import java.util.Date;
 /**
  * Created by wenha_000 on 2017-09-08.
  */
-
 public abstract class POSDevice {
+
     public static String IPTEST="168.10.5.96";
     public static int portUp=12581;
     public static int portDown=12582;
 
     //错误代码
-    public static String EC_OK="0000";
-    public static String EC_NORESPONSE="1001";
+    public static final String EC_OK="0000";
+    public static final String EC_NORESPONSE="1001";
 
-    public static String EC_PSAMERROR="8001";
-    public static String EC_RFERROR="8001";
+    public static final String EC_PSAMERROR="3001";
+    public static final String EC_RFERROR="4001";
 
-    public static String EC_VALIDATEDATE="9002";
-    public static String EC_BALANCE="9003";
-    public static String EC_TXNFAILURE="9004";
+    public static final String EC_VALIDATEDATE="9002";
+    public static final String EC_BALANCE="9003";
+
+    public static final String EC_TXNFAILURE="2001";
+    public static final String EC_TXNBREK="2002";
 
     //行业代码
     private byte tradeCode=32;
@@ -42,11 +44,14 @@ public abstract class POSDevice {
     //站点代码
     private String stationID="123456";
     //POS编码，来自于PSAM卡
-    private String posID="12345678";
+    private String posID="14060101";
     //数据保存目录
     private String workDataPath;
-    //PSAM卡操作设备
-    private PSAMDevice psamDevice;
+
+    //PSAM卡操作设备，共有3各PSAM卡设备
+    private PSAMDevice[] psamDevices;
+    private PSAMDevice currPsamDevice;
+
     //用户卡（非接）操作设备
     private RFCPUDevice rfcpuDevice;
     private Sounder sounder;
@@ -125,7 +130,9 @@ public abstract class POSDevice {
     }
 
     public String getErrorMessage() {
-        return String.format("设备：%1$s PSAM:%2$s Card:%3$s",errorMessage,psamDevice.getErrorMessage(),rfcpuDevice.getErrorMessage());    }
+        return String.format("设备：(%s)%s PSAM:(%s)%s Card:(%s)%s",errorCode,errorMessage,
+                currPsamDevice.getErrorCode(),currPsamDevice.getErrorMessage(),
+                rfcpuDevice.getErrorCode(),rfcpuDevice.getErrorMessage());    }
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
@@ -160,6 +167,25 @@ public abstract class POSDevice {
         this.posSequence = posSequence;
     }
 
+    public PSAMDevice[] getPsamDevices() {
+        return psamDevices;
+    }
+
+    public void setPsamDevices(PSAMDevice[] psamDevices) {
+        this.psamDevices = psamDevices;
+    }
+
+    public PSAMDevice getCurrPsamDevice() {
+        return currPsamDevice;
+    }
+
+    public void setCurrPsamDevice(PSAMDevice currPsamDevice) {
+        this.currPsamDevice = currPsamDevice;
+    }
+
+    public PSAMDevice getPsamDevice(){
+        return currPsamDevice;
+    }
     //打开PSAM卡
     public abstract boolean openPSAMCard();
     //读取CPU用户卡
@@ -172,12 +198,9 @@ public abstract class POSDevice {
         posSequence=0;
     }
 
-    public PSAMDevice getPsamDevice() {
-        return psamDevice;
-    }
-
-    public void setPsamDevice(PSAMDevice psamDevice) {
-        this.psamDevice = psamDevice;
+    public POSDevice(PSAMDevice[] psamDevices) {
+        this.psamDevices=psamDevices;
+        posSequence=0;
     }
 
     public RFCPUDevice getRfcpuDevice() {

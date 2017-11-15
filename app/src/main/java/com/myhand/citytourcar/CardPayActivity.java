@@ -13,6 +13,7 @@ import android.os.RemoteException;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -22,7 +23,10 @@ import com.centerm.smartpos.aidl.rfcard.AidlRFCard;
 import com.centerm.smartpos.aidl.soundplayer.AidlSoundPlayer;
 import com.centerm.smartpos.aidl.sys.AidlDeviceManager;
 import com.centerm.smartpos.constant.Constant;
+import com.centerm.smartpos.util.HexUtil;
+import com.myhand.POS.DatabaseSHCT;
 import com.myhand.cpucard.DebitRecord;
+import com.myhand.cpucard.SHTCCPUUserCard;
 import com.myhand.devices.POSDevice;
 import com.myhand.devices.V8PsamDevice;
 import com.myhand.devices.V8RFCPUDevice;
@@ -36,6 +40,7 @@ import com.myhand.shanghaicitytourcard.R;
 public class CardPayActivity extends BaseTourCardActivity
 implements Pay_Rdcard_Prompt_Fragment.OnFragmentInteractionListener,
         CardPayFragment.OnFragmentInteractionListener {
+    private static final String tag=CardPayActivity.class.getSimpleName();
     private static final int SEQ_PRINTNOTE=1;
     //本机对应设备
     public POSDevice posDevice;
@@ -108,7 +113,7 @@ implements Pay_Rdcard_Prompt_Fragment.OnFragmentInteractionListener,
 
             V8PsamDevice psamDevice=new V8PsamDevice();
             psamDevice.setPsam(psam1);
-            posDevice.setPsamDevice(psamDevice);
+            posDevice.setCurrPsamDevice(psamDevice);
 
             Toast.makeText(this,"非接设备成功连接，开始进行卡设备操作......",Toast.LENGTH_SHORT).show();
             V8RFCPUDevice v8RFCPUDevice=new V8RFCPUDevice();
@@ -200,6 +205,11 @@ implements Pay_Rdcard_Prompt_Fragment.OnFragmentInteractionListener,
         }
     };
     private void readCard(){
+        V8Sounder sounder=(V8Sounder) POSApplication.instance.getPosDevice().getSounder();
+        if(sounder!=null){
+            sounder.swipeCard();
+        }
+
         new ThreadReadCard().start();
     }
 
@@ -219,8 +229,23 @@ implements Pay_Rdcard_Prompt_Fragment.OnFragmentInteractionListener,
                 //卡支付
                 debitRecord = posDevice.complexDebit(card, debitAmount);
                 if (debitRecord == null) {
+                    if(posDevice.getErrorCode().compareTo(POSDevice.EC_TXNFAILURE)==0){
+                        V8Sounder sounder=(V8Sounder) POSApplication.instance.getPosDevice().getSounder();
+                        if(sounder!=null){
+                            sounder.communicateError();
+                        }
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                cardPayFragment.ShowErrorMessage(1, String.format("交易失败（%s）：%s",
+                                        posDevice.getErrorCode(),posDevice.getErrorMessage()));
+                            }
+                        });
+
+                        return;
+                    }
                     //检查是否需要重新做交易
-                    if(posDevice.getErrorCode().compareTo(POSDevice.EC_NORESPONSE)==0){
+                    else if(posDevice.getErrorCode().compareTo(POSDevice.EC_NORESPONSE)==0){
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -254,6 +279,10 @@ implements Pay_Rdcard_Prompt_Fragment.OnFragmentInteractionListener,
                 }
                 break;
             }
+            V8Sounder sounder=(V8Sounder)POSApplication.instance.getPosDevice().getSounder();
+            if(sounder!=null){
+                sounder.transactionSuccess();
+            }
             //打印支付凭证
             Intent intent=new Intent();
             intent.setClass(CardPayActivity.this,PrintActivity.class);
@@ -279,6 +308,26 @@ implements Pay_Rdcard_Prompt_Fragment.OnFragmentInteractionListener,
     }
 
     public void showPayPrompt() {
+        //检查是否为黑卡
+        DatabaseSHCT databaseSHCT=POSApplication.instance.getAppDatabase();
+
+        String cardNo=card.getFaceNumber();
+        Log.d(tag,String.format("检查卡%s是否是黑卡", cardNo));
+        if(databaseSHCT.isBlackCard(cardNo)){
+            V8Sounder sounder=(V8Sounder)POSApplication.instance.getPosDevice().getSounder();
+            if(sounder!=null){
+                sounder.commonAmountReader(cardNo);
+                sounder.insertCard();
+            }
+            cardPayFragment.ShowErrorMessage(1,String.format("黑卡，卡号%s",cardNo));
+            return;
+        }
+
+        V8Sounder sounder=(V8Sounder)POSApplication.instance.getPosDevice().getSounder();
+        if(sounder!=null){
+            sounder.intelligenceAmountReader(String.format("%.2f", cardPayFragment.getPayAmount()));
+        }
+
         final AlertDialog.Builder normalDialog =
                 new AlertDialog.Builder(CardPayActivity.this);
         //normalDialog.setIcon(R.drawable.);
@@ -288,6 +337,10 @@ implements Pay_Rdcard_Prompt_Fragment.OnFragmentInteractionListener,
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        V8Sounder sounder=(V8Sounder)POSApplication.instance.getPosDevice().getSounder();
+                        if(sounder!=null){
+                            sounder.swipeWaveCard();
+                        }
                         payAmount=(int)(cardPayFragment.getPayAmount()*100);
                         new ThreadCardDebit(payAmount).start();
                     }

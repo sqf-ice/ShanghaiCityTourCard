@@ -9,6 +9,8 @@ import com.myhand.common.Converter;
 import com.myhand.shanghaicitytourcard.CPUFileData0015;
 import com.myhand.shanghaicitytourcard.CPUFileDataFCI;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -134,4 +136,43 @@ public class SHTCCPUUserCard extends CPUUserCard{
         Log.d(tag,HexUtil.bytesToHexString(result)+"Card face num:"+new String(result));
         return new String(result);
     }
-}
+
+    public static String dateInCache(Date date){
+        /*
+        14．	交易日期记录交易完成时交易设备内的日期和时间，为5字节表示，年用12bitHEX表示（0—4095），
+        月用4bitHEX表示（1—12），日用5bitHEX表示（1—31），时用5bit表示（0—24），分用6bit（0—59）表示，
+        秒用6bit表示（0—59）,后2bit用0填充。例：2000年3月1日9时30分10秒将表示为7D030A5E28
+         */
+        int year=date.getYear();
+        int month=date.getMonth();
+        int day=date.getDate();
+        Log.d(tag,String.format("day is %d",day));
+        int hour=date.getHours();
+        int min=date.getMinutes();
+        int second=date.getSeconds();
+
+        //long result=(year<<10)+(month<<10)+(day<<10)+
+        int part1=(year<<4)+(month&0x0000000F);
+        Log.d(tag,String.format("%04X",part1));
+
+        int part2=(day<<11)+(hour<<6)+(min);
+        Log.d(tag,String.format("%04X",part2));
+        int part3=second<<2;
+        String resultStr=String.format("%04X%04X%02X",part1,part2,part3);
+
+        return resultStr;
+    }
+
+    public static String dateInCache(String dateStr){
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMddHHmmss");
+        try {
+            Date date=sdf.parse(dateStr);
+            return dateInCache(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return "";
+    }
+
+    }

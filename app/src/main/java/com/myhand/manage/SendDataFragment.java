@@ -87,7 +87,7 @@ public class SendDataFragment extends SettleFragment {
         textViewConnectStatus=(TextView)view.findViewById(R.id.textViewConnectStatus);
     }
 
-    public void showMessage(int index,int msgType,String messageText){
+    public void showMessage(int index,int msgType,final String messageText){
         int color=Color.rgb(0x00,0x00,0x00);
         if(getActivity()!=null&&getActivity().getResources()!=null) {
             switch (msgType) {
@@ -123,7 +123,13 @@ public class SendDataFragment extends SettleFragment {
             }
             default:{
                 //textViewConnectStatus.setTextColor(color);
-                textViewConnectStatus.setText(messageText);
+                getSettleActivity().handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        textViewConnectStatus.setText(messageText);
+                    }
+                });
+                break;
             }
         }
 

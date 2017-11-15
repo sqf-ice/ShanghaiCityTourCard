@@ -65,8 +65,6 @@ public class V8Sounder extends Sounder{
     protected void init() {
     }
 
-
-
     //20170518    智能数额朗读   wangwenxun@centerm.com
     //传入的数据如果大于0，那么不能以0开头
     public void intelligenceAmountReader(final String numberStr){
@@ -219,9 +217,7 @@ public class V8Sounder extends Sounder{
         }
     }
 
-
-
-    private void play(int type) {
+    public void play(int type) {
         if (soundPlayer != null) {
             try {
                 soundPlayer.play(type);
@@ -232,7 +228,7 @@ public class V8Sounder extends Sounder{
         }
     }
 
-    private void setReadParam(){
+    public void setReadParam(){
         MapBean mapbean = new MapBean();
         HashMap<String,Object> hashmap = new HashMap<String,Object>();
         hashmap.put("readfrequence", readSpeed);

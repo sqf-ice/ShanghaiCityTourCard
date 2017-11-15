@@ -10,8 +10,10 @@ import com.centerm.smartpos.util.HexUtil;
 import com.myhand.POS.DatabaseSHCT;
 import com.myhand.common.Converter;
 import com.myhand.cpucard.DebitRecord;
+import com.myhand.devices.POSDevice;
 import com.myhand.shanghaicitytourcard.POSApplication;
 import com.myhand.transport.DGCommHead;
+import com.myhand.transport.DGDownloadHead;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +22,7 @@ import java.io.StringReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.CRC32;
 
@@ -47,6 +50,9 @@ public class SHTCClient {
 
     public static final int TRANS_STATUS_SENDTAIL=7;
     public static final int TRANS_STATUS_SENDTAILOK=8;
+
+    public static final int TRANS_STATUS_SENDDOWNLOADREQUEST=11;
+    public static final int TRANS_STATUS_SENDDOWNLOADREQUEST_OK=12;
 
     private int transStatus=TRANS_STATUS_IDLE;
 
@@ -242,7 +248,6 @@ public class SHTCClient {
                         Log.d(tag,"Receive data:"+HexUtil.bytesToHexString(buffer));
                         rcvBuffer.putData(buffer);
                     }
-
                 } catch (IOException e) {
                     e.printStackTrace();
                     ShowMessage(1,"Socket receive data exception:"+e.getLocalizedMessage());
@@ -297,6 +302,11 @@ public class SHTCClient {
                 transStatus=TRANS_STATUS_SENDTAILOK;
                 break;
             }
+            case TRANS_STATUS_SENDDOWNLOADREQUEST:{
+                ShowMessage(0,String.format("服务器回应：%s",new String(rcvFrameData)));
+                transStatus=TRANS_STATUS_SENDDOWNLOADREQUEST_OK;
+                break;
+            }
             default:
             {
                 break;
@@ -334,7 +344,7 @@ public class SHTCClient {
     public Runnable runnableDownloadFile=new Runnable() {
         @Override
         public void run() {
-
+            sendDownloadRequest();
         }
     };
 
@@ -423,6 +433,37 @@ public class SHTCClient {
         }
 
         transStatus=TRANS_STATUS_IDLE;
+        return true;
+    }
+
+    private boolean sendDownloadRequest(){
+        POSDevice posDevice=POSApplication.instance.getPosDevice();
+        DGDownloadHead head=new DGDownloadHead(posDevice.getTradeCode(),posDevice.getPosID(),posDevice.getCorpCode(),
+                posDevice.getCorpName(),new Date(),"");
+
+        Log.d(tag,String.format("上传下载文件请求报文:%s(Length:%d)",head.getData(),head.getDataFieldLength()));
+        setStatus(TRANS_STATUS_SENDDOWNLOADREQUEST);
+        SendStringData(head.getData());
+        //等待服务器回应
+        wailtCount=300;
+        while (transStatus!=TRANS_STATUS_REQUESTOK&&wailtCount>=0)
+        {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            wailtCount--;
+        }
+        if(wailtCount<0){
+            ShowMessage(1,"等待服务器回应下载文件请求超时，结束下载过程");
+            return false;
+        }
+        if(transResult==TRANS_RESULT_FAILURE){
+            ShowMessage(1,"通讯错误，结束下载");
+            return false;
+        }
+
         return true;
     }
 

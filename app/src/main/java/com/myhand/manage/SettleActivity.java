@@ -43,7 +43,7 @@ SendDataFragment.OnFragmentInteractionListener{
     public SettleInitFragment settleInitFragment;
     public SendDataFragment sendDataFragment;
 
-    private Handler handler=new Handler(){
+    public Handler handler=new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -86,7 +86,6 @@ SendDataFragment.OnFragmentInteractionListener{
 
         intFragment();
         loadFragment(0);
-
         queryUnSendDebit();
     }
 
@@ -173,17 +172,13 @@ SendDataFragment.OnFragmentInteractionListener{
     }
 
     public void sendData(){
-/*
-        //测试打印
-        printSettleNote(currSettleSum);
-*/
-        if(listDebitRecord.size()<=0){
-            return;
-        }
         loadFragment(1);
+        if(listDebitRecord.size()<=0){
+            sendDataFragment.showMessage(0,1,String.format("正在连接服务器，请等待......"));
+            new ThreadSendData().start();
+        }
 
-        sendDataFragment.showMessage(0,1,String.format("正在连接服务器，请等待......"));
-        new ThreadSendData().start();
+        new ThreadDownloadData().start();
     }
 
     public void printSettleNote(SettleSum sum){
@@ -221,11 +216,13 @@ SendDataFragment.OnFragmentInteractionListener{
             //连接服务器
             while (true){
                 if(client.Connect()){
+                    Log.d(tag,"Server connt successfully");
+                    sendDataFragment.showMessage(3,0,"成功连接下载服务器");
                     break;
                 }
             }
             //下载数据
-            new Thread(client.runnableSendDebitRecord).start();
+            new Thread(client.runnableDownloadFile).start();
         }
     }
 

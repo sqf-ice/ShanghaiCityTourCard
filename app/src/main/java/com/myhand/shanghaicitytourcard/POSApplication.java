@@ -9,11 +9,15 @@ import com.myhand.POS.DatabaseSHCT;
 import com.myhand.POS.User;
 import com.myhand.common.AppDatabase;
 import com.myhand.cpucard.DebitRecord;
+import com.myhand.cpucard.SHTCCPUUserCard;
 import com.myhand.devices.DeviceV8;
 import com.myhand.devices.POSDevice;
 import com.myhand.devices.V8Printer;
+import com.myhand.transport.DGDownloadHead;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by wenha_000 on 2017-09-07.
@@ -40,6 +44,13 @@ public class POSApplication extends Application{
 
         posDevice=new DeviceV8();
         initDataPath();
+
+        Date date=new Date(2000,3,1,9,30,10);
+        String dateStr= SHTCCPUUserCard.dateInCache(date);
+        Log.d(tag,String.format("Date is %s",dateStr));
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMddHHmmss");
+        Log.d(tag,String.format("Date string is %s",sdf.format(date)));
+        Log.d(tag,String.format("Date is %s",SHTCCPUUserCard.dateInCache(sdf.format(date))));
     }
 
     public User getUser() {

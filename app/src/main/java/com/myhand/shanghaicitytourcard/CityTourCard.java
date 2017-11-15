@@ -33,4 +33,19 @@ public class CityTourCard extends SHTCCPUUserCard {
     {
         return String.format("%1$s%2$02X%3$08X%4$s",APDUCARDDEBIT,1,amount, HexUtil.bytesToHexString(posCode));
     }
+
+    public byte[] getInnerCardNoByte(){
+        return getFCIValidData().getCardNo();
+    }
+
+    public String getInnerCardNoStr(){
+        if(getInnerCardNoByte()==null){
+            return "";
+        }
+        return HexUtil.bytesToHexString(getInnerCardNoByte());
+    }
+
+    public String getFaceNumber(){
+        return CardFaceNum(HexUtil.hexStringToByte(getInnerCardNoStr().substring(8)));
+    }
 }

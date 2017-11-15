@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.myhand.POS.User;
+import com.myhand.devices.V8Sounder;
 import com.myhand.manage.AdminActivity;
 
 public class LoginActivity extends AppCompatActivity {
@@ -47,11 +48,19 @@ public class LoginActivity extends AppCompatActivity {
                 String username=editTextUsername.getText().toString();
                 if(username.isEmpty()){
                     editTextUsername.setHint("请输入用户名");
+                    V8Sounder sounder=(V8Sounder) POSApplication.instance.getPosDevice().getSounder();
+                    if(sounder!=null){
+                        sounder.inputPwd();
+                    }
                     return;
                 }
                 String password=editTextPassword.getText().toString();
                 if(password.isEmpty()){
                     editTextPassword.setHint("请输入密码");
+                    V8Sounder sounder=(V8Sounder) POSApplication.instance.getPosDevice().getSounder();
+                    if(sounder!=null){
+                        sounder.inputPwd();
+                    }
                     return;
                 }
                 User user=POSApplication.instance.getAppDatabase().userLogin(username,password);
@@ -60,6 +69,10 @@ public class LoginActivity extends AppCompatActivity {
                     editTextPassword.setText("");
                     editTextUsername.setText("");
                     editTextUsername.setHint("请输入正确的用户名和密码");
+                    V8Sounder sounder=(V8Sounder) POSApplication.instance.getPosDevice().getSounder();
+                    if(sounder!=null){
+                        sounder.inputPwd();
+                    }
                     return;
                 }
 

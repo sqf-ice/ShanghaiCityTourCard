@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
@@ -15,17 +16,31 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import com.centerm.smartpos.aidl.printer.AidlPrinter;
+import com.centerm.smartpos.aidl.psam.AidlPsam;
+import com.centerm.smartpos.aidl.rfcard.AidlRFCard;
+import com.centerm.smartpos.aidl.soundplayer.AidlSoundPlayer;
+import com.centerm.smartpos.aidl.sys.AidlDeviceManager;
+import com.centerm.smartpos.constant.Constant;
 import com.myhand.POS.DatabaseSHCT;
 import com.myhand.citytourcar.CardPayActivity;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.devices.DataExchangeService;
+import com.myhand.devices.POSDevice;
+import com.myhand.devices.PSAMDevice;
+import com.myhand.devices.Sounder;
+import com.myhand.devices.V8Printer;
+import com.myhand.devices.V8PsamDevice;
+import com.myhand.devices.V8RFCPUDevice;
+import com.myhand.devices.V8Sounder;
 import com.myhand.manage.SettleActivity;
 import com.myhand.manage.SettleFragment;
 import com.myhand.shtcdatafile.FHFileRecord;
 import com.myhand.shtcdatafile.SHTCClient;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseTourCardActivity {
     private String tag=MainActivity.class.getSimpleName();
     public static final int CardQuery=1;
     public static final int REQ_Settle=2;
@@ -91,6 +106,10 @@ public class MainActivity extends AppCompatActivity {
                             });
                     // 显示
                     normalDialog.show();
+                    V8Sounder sounder=(V8Sounder)POSApplication.getPOSApplication().getPosDevice().getSounder();
+                    if(sounder!=null){
+                        sounder.sign();
+                    }
                     return;
                 }
                 startDebit();
@@ -129,14 +148,17 @@ public class MainActivity extends AppCompatActivity {
         });
 */
 
+/*
         //测试黑名单卡数据库
         POSApplication application=(POSApplication)getApplication();
 
         DatabaseSHCT db=application.getAppDatabase();
-        db.insertBlkCard("123",1);
-        if(!db.isBlackCard("123"))
+        db.insertBlkCard("9209148411",1);
+        if(!db.isBlackCard("92091484110"))
         {
             Log.d(tag,"Black Card Find Failure");
+        }else{
+            Log.d(tag,String.format("Card %s is black card","92091484110"));
         }
 
         //检查是否进入消费界面
@@ -145,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
             amount=data.getInt("amount");
             startDebit();
         }
+*/
 
         //testRecord();
     }
@@ -202,4 +225,65 @@ public class MainActivity extends AppCompatActivity {
      * which is packaged with this application.
      */
     public native String stringFromJNI();
+
+    @Override
+    public void onDeviceConnected(AidlDeviceManager deviceManager) {
+        super.onDeviceConnected(deviceManager);
+        POSDevice posDevice=POSApplication.instance.getPosDevice();
+        try {
+            //声音模块
+            V8Sounder soundPlayer=(V8Sounder) posDevice.getSounder();
+            if(soundPlayer==null) {
+                soundPlayer = new V8Sounder();
+            }
+            soundPlayer.setSoundPlayer(AidlSoundPlayer.Stub.asInterface(deviceManager
+                    .getDevice(Constant.DEVICE_TYPE.DEVICE_TYPE_SOUNDPLAYER)));
+            posDevice.setSounder(soundPlayer);
+
+            //打印模块
+            V8Printer printer=(V8Printer) posDevice.getPrinter();
+            if(printer==null) {
+                printer = new V8Printer();
+            }
+            printer.setPrintDev(AidlPrinter.Stub.asInterface(deviceManager
+                    .getDevice(Constant.DEVICE_TYPE.DEVICE_TYPE_PRINTERDEV)));
+            posDevice.setPrinter(printer);
+
+            //PSAM卡模块
+            AidlPsam psam[]=new AidlPsam[]{
+                AidlPsam.Stub.asInterface(deviceManager
+                        .getDevice(Constant.DEVICE_TYPE.DEVICE_TYPE_PSAM1)),
+                AidlPsam.Stub.asInterface(deviceManager
+                    .getDevice(Constant.DEVICE_TYPE.DEVICE_TYPE_PSAM2)),
+                AidlPsam.Stub.asInterface(deviceManager
+                        .getDevice(Constant.DEVICE_TYPE.DEVICE_TYPE_PSAM3))};
+
+            if(posDevice.getPsamDevices()==null){
+                posDevice.setPsamDevices(new V8PsamDevice[]{new V8PsamDevice(psam[0]),new V8PsamDevice(psam[1]),new V8PsamDevice(psam[2])});
+            }else{
+                //更新POS设备
+                for(int i=0;i<3;i++){
+                    PSAMDevice psamDevice=posDevice.getPsamDevices()[i];
+                    if(psamDevice==null){
+                        psamDevice=new V8PsamDevice(psam[i]);
+                    }
+
+                }
+                //默认第一个PSAM卡设备
+                posDevice.setCurrPsamDevice(posDevice.getPsamDevices()[0]);
+            }
+
+            //非接设备
+            V8RFCPUDevice v8RFCPUDevice=new V8RFCPUDevice();
+            v8RFCPUDevice.setRfCard(AidlRFCard.Stub.asInterface(deviceManager.getDevice(Constant.DEVICE_TYPE.DEVICE_TYPE_RFCARD)));
+            posDevice.setRfcpuDevice(v8RFCPUDevice);
+
+            soundPlayer.activationSuccess();
+        } catch (RemoteException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Toast.makeText(this,"非接设备连接失败："+e.getMessage(),Toast.LENGTH_SHORT).show();
+        }
+
+    }
 }
