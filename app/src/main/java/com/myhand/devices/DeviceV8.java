@@ -1,22 +1,22 @@
 package com.myhand.devices;
 
-import android.icu.text.SymbolTable;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.centerm.smartpos.util.HexUtil;
 import com.myhand.POS.DatabaseSHCT;
 import com.myhand.common.Converter;
+import com.myhand.common.SelectActivity;
 import com.myhand.cpucard.CPUUserCard;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.cpucard.SHTCCPUUserCard;
 import com.myhand.cpucard.SHTCPsamCard;
 import com.myhand.shanghaicitytourcard.CPUFileDataFCI;
-import com.myhand.shanghaicitytourcard.CityCardQueryActivity;
 import com.myhand.shanghaicitytourcard.CityTourCard;
-import com.myhand.shanghaicitytourcard.POSApplication;
+import com.myhand.POS.POSApplication;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -30,6 +30,8 @@ public class DeviceV8 extends POSDevice {
     //记录当前余额，用于判断用户卡是否扣款后交易失败
     private int oldBalance=-1;
     private int redebit=0;
+
+    private int redoCnt;
 
     public DeviceV8(){
     }
@@ -143,7 +145,7 @@ public class DeviceV8 extends POSDevice {
                 mLogString.add(0,"PSAM卡选择文件失败");
             }
 */
-        if(!psamCard.readKeyVersion(getPsamDevice()))
+        if(!psamCard.psamReadKeyVersion(getPsamDevice()))
         {
             getPsamDevice().setErrorMessage("读取PSAM卡密钥版本号失败");
         }
@@ -169,14 +171,38 @@ public class DeviceV8 extends POSDevice {
         }
         CityTourCard card=new CityTourCard(retData,getRfcpuDevice().readChipType());
 
+        //选择3F00文件
+        while(true) {
+            String apdu = "00A40000023F00";
+            byte[] result = getRfcpuDevice().sendAPDU(HexUtil.hexStringToByte(apdu));
+            if (result != null) {
+                Log.d(tag, String.format("%s", HexUtil.bytesToHexString(result)));
+                break;
+            } else {
+                Log.d(tag, "选择3f00文件失败");
+                Intent intent=new Intent();
+                intent.setClass(getActivity(),SelectActivity.class);
+                intent.putExtra("messageText","请再刷一次");
+                getActivity().startActivityForResult(intent,101);
+                while (!isOK){
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    continue;
+                }
+            }
+        }
         //读取0x05文件
-        String apduRd05="00B0850000";
+        String apduRd05="00B0850020";
         byte[] result=getRfcpuDevice().sendAPDU(HexUtil.hexStringToByte(apduRd05));
         if(result==null){
             setError(EC_NORESPONSE,String.format("读取0x05文件失败：%s",apduRd05));
             return null;
         }
-        Log.d(tag,String.format("05文件：%s卡类型：%02X",HexUtil.bytesToHexString(result),result[8]));
+        //String errorCode
+        Log.d(tag,String.format("05文件：%s卡类型：%02X" ,HexUtil.bytesToHexString(result),result[8]));
         card.setTypeIn05(result[8]);
 
         //读取FCI数据，上海交通卡规范
@@ -197,12 +223,17 @@ public class DeviceV8 extends POSDevice {
             setError(EC_NORESPONSE,String.format("获取卡余额失败：%s",card.APDUFETCHBALANCE));
             return null;
         }
-        byte[] balance=CPUDevice.getResponseData(result);
-        Log.d(tag,String.format("卡余额:apdu:%s Result:%s balance:%d",card.APDUFETCHBALANCE,HexUtil.bytesToHexString(balance),
-                Converter.BytesToLong(balance)));
+        String errorCode=CPUDevice.parseResponse(result);
+        if(errorCode.compareTo("9000")!=0){
+            Log.d(tag,String.format("返回钱包余额失败：apdu:%s result:%s",card.APDUFETCHBALANCE,HexUtil.bytesToHexString(result)));
 
-        card.setByteBalance(balance);
+        }else {
+            byte[] balance = CPUDevice.getResponseData(result);
+            Log.d(tag, String.format("卡余额:apdu:%s Result:%s balance:%d", card.APDUFETCHBALANCE, HexUtil.bytesToHexString(balance),
+                    Converter.BytesToLong(balance)));
 
+            card.setByteBalance(balance);
+        }
         //读取用户卡认证码
         card.setVerifyCode(((V8RFCPUDevice)getRfcpuDevice()).readVerifyCode());
 
@@ -321,7 +352,8 @@ public class DeviceV8 extends POSDevice {
                 amount,dateString,
                 (int)Converter.BytesToLong(cardCounter),psamCard.getPosNo(),
                 HexUtil.bytesToHexString(tac),
-                (byte)Integer.parseInt(psamCard.getKeyVersion(),0x10),//卡内版本号
+                //(byte)Integer.parseInt(psamCard.getKeyVersion(),0x10),
+               psamCard.getKeyVersion(), // 卡内版本号
                 (byte)0);
 
         DatabaseSHCT db=POSApplication.getPOSApplication().getAppDatabase();
@@ -553,7 +585,7 @@ public class DeviceV8 extends POSDevice {
                         "A00000000386980701" +
                         "00";
                 //取交易认证码
-                apdu="805A000602"+HexUtil.bytesToHexString(cardSeq);
+                apdu="805A000902"+HexUtil.bytesToHexString(cardSeq);
                 ret=getRfcpuDevice().sendAPDU(HexUtil.hexStringToByte(apdu));
                 if(ret==null){
                     setError(POSDevice.EC_NORESPONSE,String.format("取交易认证码失败:%s",apdu));
@@ -564,9 +596,9 @@ public class DeviceV8 extends POSDevice {
                     psamDevice.setError(errorCode,String.format("取交易认证码失败:APDU:%s Response:%s",apdu,HexUtil.bytesToHexString(ret)));
                     return null;
                 }
-
-                System.arraycopy(ret,0,mac2,0,4);
-                System.arraycopy(ret,4,tac,0,4);
+                Log.d(tag,String.format("取交易认证码,apud:%s result:%s",apdu,HexUtil.bytesToHexString(ret)));
+                System.arraycopy(ret,0,tac,0,4);
+                System.arraycopy(ret,4,mac2,0,4);
                 isBreakTxn=true;
             }
         }
@@ -627,35 +659,148 @@ public class DeviceV8 extends POSDevice {
             Log.d(tag, String.format("用户卡交易完成，apdu=%s", apduUserCardEnd));
             ret = userCardDevice.sendAPDU(HexUtil.hexStringToByte(apduUserCardEnd));
             if (ret == null) {
+                Log.d(tag,String.format("用户卡交易完成失败:%s", apduUserCardEnd));
+
+                String apdu = "805A000902" + HexUtil.bytesToHexString(cardSeq);
+                while (true) {
+                    //取交易认证码
+                    getRfcpuDevice().close();
+                    getRfcpuDevice().open();
+                    CityTourCard newcard=readCard();
+                    if(newcard==null){
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        continue;
+                    }
+                    if(newcard.getInnerCardNoStr().compareTo(currCard.getInnerCardNoStr())!=0){
+
+                    }
+                    Log.d(tag, String.format("Old cardseg=%s", HexUtil.bytesToHexString(cardSeq)));
+                    cardSeq = Converter.incBytes(cardSeq);
+
+                    ret = getRfcpuDevice().sendAPDU(HexUtil.hexStringToByte(apdu));
+                    if (ret == null) {
+                        isOK=false;
+                        Intent intent=new Intent();
+                        intent.setClass(getContext(), SelectActivity.class);
+                        Bundle bundle=new Bundle();
+                        intent.putExtra("messageText","请选择");
+                        getActivity().startActivityForResult(intent,101);
+                        Message msg=getHandler().obtainMessage();
+                        getHandler().sendMessage(msg);
+                        //showPayPrompt("重新取MAC2","请重新刷卡！");
+                        while (!isOK){
+                            try {
+                                Thread.sleep(10);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            continue;
+                        }
+                        if(!selectResult){
+                            return  null;
+                        }else{
+                            continue;
+                        }
+/*
+                    Log.d(tag,String.format("取交易认证码失败:%s",apdu));
+                    setError(POSDevice.EC_NORESPONSE,String.format("取交易认证码失败:%s",apdu));
+                    return null;
+*/
+                    }
+                    break;
+                }
+                //Log.d(tag,String.format("apdu:%s result:%s",apdu,HexUtil.bytesToHexString(ret)));
+
+                errorCode=CPUDevice.parseResponse(ret);
+                if(errorCode.compareTo("9000")!=0) {
+                    setError(EC_TXNBREK,String.format("取交易认证码失败:APDU:%s Response:%s",apdu,HexUtil.bytesToHexString(ret)));
+                    getRfcpuDevice().setError(errorCode,String.format("取交易认证码失败:APDU:%s Response:%s",apdu,HexUtil.bytesToHexString(ret)));
+                    return null;
+                }
+                System.arraycopy(ret,0,mac2,0,4);
+                System.arraycopy(ret,4,tac,0,4);
+                Log.d(tag,String.format("取交易认证码成功 apdu：%s result:%s mac2:%s",
+                        apdu,HexUtil.bytesToHexString(ret),HexUtil.bytesToHexString(mac2)));
+
+
+/*
                 setError(POSDevice.EC_NORESPONSE, String.format("用户卡交易完成失败:%s", apduUserCardEnd));
                 return null;
+*/
+            }else {
+                Log.d(tag, String.format("apdu:%s result:%s", apduUserCardEnd, HexUtil.bytesToHexString(ret)));
+                errorCode = CPUDevice.parseResponse(ret);
+                //错误码不为9000时重取mac和tac
+                if (errorCode.compareTo("9000") != 0) {
+                    //记录卡计数器
+
+                    getRfcpuDevice().close();
+                    getRfcpuDevice().open();
+                    //重新读卡
+                    currCard = readCard();
+                    //取交易认证码
+                    Log.d(tag, String.format("Old cardseg=%s", HexUtil.bytesToHexString(cardSeq)));
+                    cardSeq = Converter.incBytes(cardSeq);
+
+                    String apdu = "805A000902" + HexUtil.bytesToHexString(cardSeq);
+                    ret = getRfcpuDevice().sendAPDU(HexUtil.hexStringToByte(apdu));
+                    if (ret == null) {
+                        setError(POSDevice.EC_NORESPONSE, String.format("取交易认证码失败:%s", apdu));
+                        return null;
+                    }
+                    Log.d(tag, String.format("apdu:%s result:%s", apdu, HexUtil.bytesToHexString(ret)));
+
+                    errorCode = CPUDevice.parseResponse(ret);
+                    if (errorCode.compareTo("9000") != 0) {
+                        setError(EC_TXNBREK, String.format("取交易认证码失败:APDU:%s Response:%s", apdu, HexUtil.bytesToHexString(ret)));
+                        getRfcpuDevice().setError(errorCode, String.format("取交易认证码失败:APDU:%s Response:%s", apdu, HexUtil.bytesToHexString(ret)));
+                        return null;
+                    }
+                    Log.d(tag, String.format("取交易认证码apdu:%s result:%s", apdu, HexUtil.bytesToHexString(ret)));
+                    System.arraycopy(ret, 0, mac2, 0, 4);
+                    System.arraycopy(ret, 4, tac, 0, 4);
+/*
+                {
+                    Log.d(tag, String.format("用户卡交易完成失败:%s(%s)", apduUserCardEnd, errorCode));
+                    setError(POSDevice.EC_TXNFAILURE, String.format("用户卡交易完成失败:%s(%s)", apduUserCardEnd, errorCode));
+                    getRfcpuDevice().setError(errorCode, String.format("用户卡交易完成失败:APDU:%s Response:%s", apduUserCardUpdateCache, HexUtil.bytesToHexString(ret)));
+                    return null;
+                }
+*/
+                }
+                Log.d(tag, "用户卡交易完成 apdu:" + apduUserCardEnd + " Result:" + HexUtil.bytesToHexString(ret));
+                System.arraycopy(ret, 0, tac, 0, 4);
+                System.arraycopy(ret, 4, mac2, 0, 4);
             }
-            errorCode = CPUDevice.parseResponse(ret);
-            if (errorCode.compareTo("9000") != 0) {
-                setError(POSDevice.EC_TXNFAILURE, String.format("用户卡交易完成失败:%s(%s)", apduUserCardEnd, errorCode));
-                getRfcpuDevice().setError(errorCode, String.format("用户卡更新复合消费缓存失败:APDU:%s Response:%s", apduUserCardUpdateCache, HexUtil.bytesToHexString(ret)));
-                return null;
-            }
-            Log.d(tag, "用户卡交易完成 apdu:" + apduUserCardEnd + " Result:" + HexUtil.bytesToHexString(ret));
-            System.arraycopy(ret, 0, tac, 0, 4);
-            System.arraycopy(ret, 4, mac2, 0, 4);
         }
 
         //PSAM卡完成交易
+        Log.d(tag,String.format("Mac2:%s",HexUtil.bytesToHexString(mac2)));
         String apduPsamCardEnd="8072000004"+HexUtil.bytesToHexString(mac2);
         ret=getPsamDevice().sendAPDU(HexUtil.hexStringToByte(apduPsamCardEnd));
         if(ret==null){
             setError(POSDevice.EC_NORESPONSE,String.format("PSAM卡完成交易失败:%s",apduPsamCardEnd));
             return null;
         }
+        Log.d(tag,String.format("PSAM卡完成交易,apdu:%s result:%s",apduPsamCardEnd,HexUtil.bytesToHexString(ret)));
         errorCode=CPUDevice.parseResponse(ret);
         if(errorCode.compareTo("9000")!=0) {
-            setError(POSDevice.EC_TXNFAILURE,String.format("PSAM卡完成交易失败:%s(%s)",apduPsamCardEnd,errorCode));
-            getRfcpuDevice().setError(errorCode,String.format("PSAM卡完成交易失败:APDU:%s Response:%s",apduPsamCardEnd,HexUtil.bytesToHexString(ret)));
+            //MAC2无效，记录该卡
+            POSApplication.instance.getAppDatabase().isMac2ErrCard(currCard.getInnerCardNoStr());
+
+            setError(POSDevice.EC_INVALIDCARD,String.format("无效卡，PSAM卡完成交易失败:%s(%s)",apduPsamCardEnd,errorCode));
+            psamDevice.setError(errorCode,String.format("PSAM卡完成交易失败:APDU:%s Response:%s",apduPsamCardEnd,HexUtil.bytesToHexString(ret)));
             return null;
         }
         Log.d(tag,"PSAM卡完成交易 apdu:"+apduPsamCardEnd+" Result:"+HexUtil.bytesToHexString(ret));
         //保存交易
+        if(POSApplication.instance.getUser().getUsername()==null){
+            POSApplication.instance.getUser().setUsername("1001");
+        }
         DebitRecord debitRecord=new DebitRecord(getCorpCode(),
                 0,
                 (byte) 0x09,
@@ -670,7 +815,8 @@ public class DeviceV8 extends POSDevice {
                 amount,dateString,
                 (int)Converter.BytesToLong(cardSeq),psamCard.getPosNo(),
                 HexUtil.bytesToHexString(tac),
-                (byte)Integer.parseInt(psamCard.getKeyVersion(),0x10),//卡内版本号
+                //(byte)Integer.parseInt(psamCard.getKeyVersion(),0x10),
+                psamCard.getKeyVersion(),//卡内版本号
                 (byte)0);
 
         DatabaseSHCT db=POSApplication.getPOSApplication().getAppDatabase();

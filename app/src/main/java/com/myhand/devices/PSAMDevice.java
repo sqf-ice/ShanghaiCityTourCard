@@ -9,6 +9,10 @@ import com.myhand.cpucard.PSAMCard;
 public abstract class PSAMDevice extends CPUDevice {
     private PSAMCard psamCard;
 
+    public PSAMDevice() {
+        psamCard=new PSAMCard();
+    }
+
     public PSAMCard getPsamCard() {
         return psamCard;
     }
@@ -16,4 +20,5 @@ public abstract class PSAMDevice extends CPUDevice {
     public void setPsamCard(PSAMCard psamCard) {
         this.psamCard = psamCard;
     }
+
 }

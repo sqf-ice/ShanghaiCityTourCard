@@ -12,6 +12,7 @@ public abstract class CPUDevice {
 
     public abstract byte[] sendAPDU(byte[] apdu);
     public abstract boolean open();
+    public abstract void close();
     public abstract byte[] reset();
     public abstract byte readChipType();
 
@@ -67,5 +68,4 @@ public abstract class CPUDevice {
         System.arraycopy(responseData,0,resultByte,0,responseData.length-2);
         return resultByte;
     }
-
 }

@@ -1,28 +1,20 @@
 package com.myhand.control;
 
 import android.content.Context;
-import android.content.Intent;
-import android.database.DataSetObserver;
-import android.graphics.Color;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.centerm.smartpos.util.HexUtil;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.cpucard.SHTCCPUUserCard;
-import com.myhand.shanghaicitytourcard.POSApplication;
+import com.myhand.POS.POSApplication;
 import com.myhand.shanghaicitytourcard.R;
-import com.myhand.shanghaicitytourcard.TextViewActivity;
-import com.myhand.shtcdatafile.FHFileRecord;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.zip.Inflater;
 
 /**
  * Created by wenha_000 on 2017-09-16.

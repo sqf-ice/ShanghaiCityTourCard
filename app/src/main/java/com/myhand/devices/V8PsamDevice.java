@@ -1,5 +1,7 @@
 package com.myhand.devices;
 
+import android.util.Log;
+
 import com.centerm.smartpos.aidl.psam.AidlPsam;
 import com.centerm.smartpos.util.HexUtil;
 import com.myhand.cpucard.PSAMCard;
@@ -10,6 +12,7 @@ import com.myhand.cpucard.SHTCPsamCard;
  */
 
 public class V8PsamDevice extends PSAMDevice {
+    private static final String tag=V8RFCPUDevice.class.getSimpleName();
     private AidlPsam psam;
 
     public V8PsamDevice() {
@@ -46,7 +49,13 @@ public class V8PsamDevice extends PSAMDevice {
             setErrorMessage("打开失败："+e.getLocalizedMessage());
             return false;
         }
+        Log.d(tag,"PSAM打开成功");
         return true;
+    }
+
+    @Override
+    public void close() {
+
     }
 
     @Override

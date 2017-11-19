@@ -2,13 +2,12 @@ package com.myhand.shtcdatafile;
 
 import android.util.Log;
 
-import com.myhand.shanghaicitytourcard.POSApplication;
+import com.myhand.POS.POSApplication;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

@@ -8,10 +8,8 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.TextView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
@@ -24,19 +22,18 @@ import com.centerm.smartpos.aidl.rfcard.AidlRFCard;
 import com.centerm.smartpos.aidl.soundplayer.AidlSoundPlayer;
 import com.centerm.smartpos.aidl.sys.AidlDeviceManager;
 import com.centerm.smartpos.constant.Constant;
-import com.myhand.POS.DatabaseSHCT;
+import com.myhand.POS.POSApplication;
 import com.myhand.citytourcar.CardPayActivity;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.devices.DataExchangeService;
 import com.myhand.devices.POSDevice;
 import com.myhand.devices.PSAMDevice;
-import com.myhand.devices.Sounder;
 import com.myhand.devices.V8Printer;
 import com.myhand.devices.V8PsamDevice;
 import com.myhand.devices.V8RFCPUDevice;
 import com.myhand.devices.V8Sounder;
+import com.myhand.manage.LoginActivity;
 import com.myhand.manage.SettleActivity;
-import com.myhand.manage.SettleFragment;
 import com.myhand.shtcdatafile.FHFileRecord;
 import com.myhand.shtcdatafile.SHTCClient;
 
@@ -135,6 +132,12 @@ public class MainActivity extends BaseTourCardActivity {
                 startActivityForResult(intent,DebitQuery);
             }
         });
+
+/*
+        //解析黑名单
+        POSApplication.instance.parseBLFile();
+*/
+
 
 /*
         Button btnFHFileUploadInfo=(Button)findViewById(R.id.buttonUploadFileInfo) ;
@@ -278,7 +281,7 @@ public class MainActivity extends BaseTourCardActivity {
             v8RFCPUDevice.setRfCard(AidlRFCard.Stub.asInterface(deviceManager.getDevice(Constant.DEVICE_TYPE.DEVICE_TYPE_RFCARD)));
             posDevice.setRfcpuDevice(v8RFCPUDevice);
 
-            soundPlayer.activationSuccess();
+            //soundPlayer.activationSuccess();
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

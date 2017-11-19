@@ -145,6 +145,35 @@ public class DatabaseSHCT extends AppDatabase{
         return result;
     }
 
+    private static final String TBMAC2ErrCard="TBMac2ErrorCard";
+    private static final String sqlCreateTBMac2ErrCard=String.format("Create Table %s(\n"
+            +"CardInnerNo varchar2 not null primary key,\n"
+            +"status decimal(2) not null default 1)",TBMAC2ErrCard);
+
+    public boolean isMac2ErrCard(String cardInnerNo){
+        String sqlSelect=String.format("Select * from %s where CardInnerNo='%s' and status>0",TBMAC2ErrCard,cardInnerNo);
+        Cursor cursor=ExecQuery(sqlSelect);
+
+        return cursor!=null&&cursor.getCount()>0;
+    }
+
+    public void insertMac2ErrCard(String cardInnerNo){
+        String sqlInsert=String.format("Insert into %s(CardInnerNo,status) values ('%s',1)",TBMAC2ErrCard,cardInnerNo);
+        boolean result=ExecCommand(sqlInsert);
+        Log.d(tag,String.format("Exec sql,sql:(%s) result:%s",sqlInsert,result?"成功":"失败"));
+    }
+
+    public void deleteMac2ErrCard(String cardInnerNo){
+        String sqlDelete=String.format("delete from %s where CardInnerNo='%s'",TBMAC2ErrCard,cardInnerNo);
+        ExecCommand(sqlDelete);
+    }
+
+    public void deleteMac2ErrCard(){
+        String sqlDelete=String.format("delete from %s where status>=0",TBMAC2ErrCard);
+        ExecCommand(sqlDelete);
+    }
+
+
     public void init()
     {
         Log.d(tag,"Create table");
@@ -172,6 +201,7 @@ public class DatabaseSHCT extends AppDatabase{
         insertUser(user);
 
         ExecCommand(sqlCreateTBSettle);
+        ExecCommand(sqlCreateTBMac2ErrCard);
     }
 
     public static final String TB_PosInfo="TBPosInfo";

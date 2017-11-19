@@ -1,5 +1,7 @@
 package com.myhand.devices;
 
+import android.os.RemoteException;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.centerm.smartpos.aidl.rfcard.AidlRFCard;
@@ -12,6 +14,8 @@ import com.myhand.shanghaicitytourcard.CityCardQueryActivity;
  */
 
 public class V8RFCPUDevice extends RFCPUDevice{
+    private static final String tag=V8RFCPUDevice.class.getSimpleName();
+
     private AidlRFCard rfCard;
 
     public V8RFCPUDevice() {
@@ -28,6 +32,15 @@ public class V8RFCPUDevice extends RFCPUDevice{
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void close() {
+        try {
+            rfCard.close();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -104,6 +117,16 @@ public class V8RFCPUDevice extends RFCPUDevice{
 
     public byte[] readVerifyCode()
     {
-        return sendAPDU(HexUtil.hexStringToByte(SHTCPsamCard.APDUUSERCODE));
+        byte[] ret=sendAPDU(HexUtil.hexStringToByte(SHTCPsamCard.APDUUSERCODE));
+        if(ret==null){
+            Log.d(tag,String.format("取认证码没有回应，apdu:%s",SHTCPsamCard.APDUUSERCODE));
+            return null;
+        }
+        String errorCode=CPUDevice.parseResponse(ret);
+        if(errorCode.compareTo("9000")!=0){
+            Log.d(tag,String.format("取认证码失败，apdu:%s result:%s",SHTCPsamCard.APDUUSERCODE,HexUtil.bytesToHexString(ret)));
+            return null;
+        }
+        return CPUDevice.getResponseData(ret);
     }
 }

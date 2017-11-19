@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.devices.POSDevice;
-import com.myhand.shanghaicitytourcard.POSApplication;
 import com.myhand.shtcdatafile.FHFileDescription;
 import com.myhand.shtcdatafile.FHFileRecord;
 import com.myhand.shtcdatafile.FileName;

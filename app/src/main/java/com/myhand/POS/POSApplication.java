@@ -1,21 +1,18 @@
-package com.myhand.shanghaicitytourcard;
+package com.myhand.POS;
 
 import android.app.Application;
-import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
-import com.myhand.POS.DatabaseSHCT;
-import com.myhand.POS.User;
-import com.myhand.common.AppDatabase;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.cpucard.SHTCCPUUserCard;
 import com.myhand.devices.DeviceV8;
 import com.myhand.devices.POSDevice;
 import com.myhand.devices.V8Printer;
-import com.myhand.transport.DGDownloadHead;
+import com.myhand.shtcdatafile.DataFile;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -51,6 +48,7 @@ public class POSApplication extends Application{
         SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMddHHmmss");
         Log.d(tag,String.format("Date string is %s",sdf.format(date)));
         Log.d(tag,String.format("Date is %s",SHTCCPUUserCard.dateInCache(sdf.format(date))));
+
     }
 
     public User getUser() {
@@ -124,11 +122,13 @@ public class POSApplication extends Application{
         }
     }
 
+    //获取消费文件保存路径
     public String getDebitFilePath()
     {
         return dataPath+"/"+DIRDEBIT;
     }
 
+    //打印小票
     public boolean printPayNot(DebitRecord debitRecord){
         V8Printer printer=(V8Printer) posDevice.getPrinter();
         if(printer==null){
@@ -137,6 +137,51 @@ public class POSApplication extends Application{
         }
 
         
+        return true;
+    }
+
+    //解析黑名单文件
+    public boolean parseBLFile(){
+        //检查相关目录
+        String blPpath=String.format("%s/BL",dataPath);
+        String blPathBackup=String.format("%s/Backup",blPpath);
+        File file=new File(blPathBackup);
+        if(!file.exists()){
+            if(!file.mkdirs()){
+                return false;
+            }
+        }
+
+        file=new File(blPpath);
+        if(!file.exists()){
+            if(!file.mkdirs()){
+                return false;
+            }
+        }
+        //查找黑名单文件
+        File[] blFiles= file.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                if(name.substring(0,2).compareTo("BL")==0){
+                    return true;
+                }
+                return false;
+            }
+        });
+        Log.d(tag,String.format("找到%d个黑名单文件",blFiles.length));
+        //解析文件
+        for(File tmpfile:blFiles){
+            Log.d(tag,String.format("开始处理黑名单文件%s......",tmpfile.getName()));
+            if(DataFile.parseBLFile(blPpath,tmpfile.getName())){
+                Log.d(tag,String.format("成功解析黑名单文件%s",file.getName()));
+                if(!tmpfile.renameTo(new File(blPathBackup,file.getName()))){
+                    Log.d(tag,String.format("备份黑名单文件%s失败",file.getName()));
+                }
+            }else{
+                Log.d(tag,String.format("黑名单文件%s解析失败",file.getName()));
+            }
+        }
+
         return true;
     }
 }

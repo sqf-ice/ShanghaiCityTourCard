@@ -1,6 +1,5 @@
 package com.myhand.shtcdatafile;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -8,17 +7,15 @@ import android.util.Log;
 
 import com.centerm.smartpos.util.HexUtil;
 import com.myhand.POS.DatabaseSHCT;
-import com.myhand.common.Converter;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.devices.POSDevice;
-import com.myhand.shanghaicitytourcard.POSApplication;
+import com.myhand.POS.POSApplication;
 import com.myhand.transport.DGCommHead;
 import com.myhand.transport.DGDownloadHead;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;

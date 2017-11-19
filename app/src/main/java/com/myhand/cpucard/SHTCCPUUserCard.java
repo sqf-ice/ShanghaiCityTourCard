@@ -36,6 +36,9 @@ public class SHTCCPUUserCard extends CPUUserCard{
     //卡余额4字节HEX
     private byte[] byteBalance;
 
+    private byte[] byteSequence;
+    private byte[] algBytes;
+
     //0015文件
     CPUFileData0015 file0015;
     CPUFileDataFCI dataFCI;
@@ -43,6 +46,22 @@ public class SHTCCPUUserCard extends CPUUserCard{
     public SHTCCPUUserCard()
     {
 
+    }
+
+    public byte[] getAlgBytes() {
+        return algBytes;
+    }
+
+    public void setAlgBytes(byte[] algBytes) {
+        this.algBytes = algBytes;
+    }
+
+    public byte[] getByteSequence() {
+        return byteSequence;
+    }
+
+    public void setByteSequence(byte[] byteSequence) {
+        this.byteSequence = byteSequence;
     }
 
     public byte getTypeIn05() {

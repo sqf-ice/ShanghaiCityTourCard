@@ -1,5 +1,15 @@
 package com.myhand.devices;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Handler;
+import android.util.Log;
+
+import com.myhand.POS.DatabaseSHCT;
+import com.myhand.POS.POSApplication;
+import com.myhand.citytourcar.CardPayActivity;
 import com.myhand.common.Converter;
 import com.myhand.cpucard.CPUUserCard;
 import com.myhand.cpucard.DebitRecord;
@@ -14,37 +24,40 @@ import java.util.Date;
  * Created by wenha_000 on 2017-09-08.
  */
 public abstract class POSDevice {
+    private Context context;
 
-    public static String IPTEST="168.10.5.96";
-    public static int portUp=12581;
-    public static int portDown=12582;
+
+    public static String IPTEST = "168.10.5.96";
+    public static int portUp = 12581;
+    public static int portDown = 12582;
 
     //错误代码
-    public static final String EC_OK="0000";
-    public static final String EC_NORESPONSE="1001";
+    public static final String EC_OK = "0000";
+    public static final String EC_NORESPONSE = "1001";
 
-    public static final String EC_PSAMERROR="3001";
-    public static final String EC_RFERROR="4001";
+    public static final String EC_PSAMERROR = "3001";
+    public static final String EC_RFERROR = "4001";
 
-    public static final String EC_VALIDATEDATE="9002";
-    public static final String EC_BALANCE="9003";
+    public static final String EC_VALIDATEDATE = "9002";
+    public static final String EC_BALANCE = "9003";
 
-    public static final String EC_TXNFAILURE="2001";
-    public static final String EC_TXNBREK="2002";
+    public static final String EC_TXNFAILURE = "2001";
+    public static final String EC_TXNBREK = "2002";
+    public static final String EC_INVALIDCARD = "2003";
 
     //行业代码
-    private byte tradeCode=32;
+    private byte tradeCode = 32;
     //公司代码
-    private String corpCode="00320000001";
+    private String corpCode = "00320000001";
     //公司名称
-    private String corpName="SHANDE";
-    private String corpChinesename="上海秩城科技有限公司";
+    private String corpName = "SHANDE";
+    private String corpChinesename = "上海秩城科技有限公司";
     //批次号
     private int patchNo;
     //站点代码
-    private String stationID="123456";
+    private String stationID = "123456";
     //POS编码，来自于PSAM卡
-    private String posID="14060101";
+    private String posID = "01125936";
     //数据保存目录
     private String workDataPath;
 
@@ -61,9 +74,17 @@ public abstract class POSDevice {
     private String errorMessage;
 
     //交易类型，取决于POS机设备
-    private byte txnType=88;
+    private byte txnType = 88;
     //设备流水号
-    private  int posSequence;
+    private int posSequence;
+
+    public Context getContext() {
+        return context;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
 
     public String getWorkDataPath() {
         return workDataPath;
@@ -130,17 +151,18 @@ public abstract class POSDevice {
     }
 
     public String getErrorMessage() {
-        return String.format("设备：(%s)%s PSAM:(%s)%s Card:(%s)%s",errorCode,errorMessage,
-                currPsamDevice.getErrorCode(),currPsamDevice.getErrorMessage(),
-                rfcpuDevice.getErrorCode(),rfcpuDevice.getErrorMessage());    }
+        return String.format("设备：(%s)%s PSAM:(%s)%s Card:(%s)%s", errorCode, errorMessage,
+                currPsamDevice.getErrorCode(), currPsamDevice.getErrorMessage(),
+                rfcpuDevice.getErrorCode(), rfcpuDevice.getErrorMessage());
+    }
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
-    public void setError(String errorCode,String errorMessage){
-        this.errorCode=errorCode;
-        this.errorMessage=errorMessage;
+    public void setError(String errorCode, String errorMessage) {
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
     }
 
     public String getStationID() {
@@ -183,24 +205,29 @@ public abstract class POSDevice {
         this.currPsamDevice = currPsamDevice;
     }
 
-    public PSAMDevice getPsamDevice(){
+    public PSAMDevice getPsamDevice() {
         return currPsamDevice;
     }
+
     //打开PSAM卡
     public abstract boolean openPSAMCard();
+
     //读取CPU用户卡
     public abstract CityTourCard readCard();
+
     //用户卡简单消费
     public abstract DebitRecord debit(CPUUserCard userCard, int amount);
+
     //用户卡复合消费
-    public abstract DebitRecord complexDebit(CPUUserCard userCard,int amount);
+    public abstract DebitRecord complexDebit(CPUUserCard userCard, int amount);
+
     public POSDevice() {
-        posSequence=0;
+        posSequence = 0;
     }
 
     public POSDevice(PSAMDevice[] psamDevices) {
-        this.psamDevices=psamDevices;
-        posSequence=0;
+        this.psamDevices = psamDevices;
+        posSequence = 0;
     }
 
     public RFCPUDevice getRfcpuDevice() {
@@ -213,21 +240,24 @@ public abstract class POSDevice {
 
     /**
      * 文件标识（2位）+日期（6位）+ 行业代码（2）+ 营运单位代码（11）+ 序列号（3位）+来源标志（1）
+     *
      * @param type
      * @return
      */
-    public String makeFHFileName(int sequence,char type){
-        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyMMdd");
-        String result=String.format("FH%s%02d%s%03d%c",simpleDateFormat.format(new Date()),
-                tradeCode,posID,sequence,type);
+    public String makeFHFileName(int sequence, char type) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyMMdd");
+        String result = String.format("FH%s%02d%s%03d%c", simpleDateFormat.format(new Date()),
+                tradeCode, posID, sequence, type);
 
         return result;
     }
+
     /**
      * 形成消费记录文件
+     *
      * @return
      */
-    public boolean makeFHFile(){
+    public boolean makeFHFile() {
         return false;
     }
 
@@ -245,5 +275,62 @@ public abstract class POSDevice {
 
     public void setPrinter(Printer printer) {
         this.printer = printer;
+    }
+
+    public boolean selectResult;
+    public boolean isOK=false;
+
+    private Handler handler;
+    private Activity activity;
+
+    public Activity getActivity() {
+        return activity;
+    }
+
+    public boolean isOK() {
+        return isOK;
+    }
+
+    public void setOK(boolean OK) {
+        isOK = OK;
+    }
+
+    public void setActivity(Activity activity) {
+        this.activity = activity;
+    }
+
+    public Handler getHandler() {
+        return handler;
+    }
+
+    public void setHandler(Handler handler) {
+        this.handler = handler;
+    }
+
+    public void showPayPrompt(String title, String messageText) {
+        final AlertDialog.Builder normalDialog =
+                new AlertDialog.Builder(context);
+        //normalDialog.setIcon(R.drawable.);
+        normalDialog.setTitle(title);
+        normalDialog.setMessage(messageText);
+        normalDialog.setPositiveButton("确定",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        selectResult = true;
+                        isOK=true;
+                    }
+                });
+        normalDialog.setNegativeButton("取消",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        selectResult = false;
+                        isOK=true;
+                    }
+                });
+        isOK=false;
+        // 显示
+        normalDialog.show();
     }
 }

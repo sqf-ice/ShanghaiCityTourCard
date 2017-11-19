@@ -11,6 +11,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.myhand.POS.POSApplication;
 import com.myhand.control.DebitQueryAdapter;
 import com.myhand.cpucard.DebitRecord;
 

@@ -75,8 +75,11 @@ public class DataBlock {
     public String getDataField(int index)
     {
         if(fieldsLength[index]==0){
+            Log.d(tag,String.format("Field %d length is 0",index));
             return "";
         }
+        Log.d(tag,String.format("Data(%d):'%s' index=%d pos=%d length=%d fielddata:%s",data.length(),data,index,getFieldPos(index),
+                fieldsLength[index],data.substring(getFieldPos(index),fieldsLength[index])));
         return data.substring(getFieldPos(index),fieldsLength[index]).trim();
     }
 

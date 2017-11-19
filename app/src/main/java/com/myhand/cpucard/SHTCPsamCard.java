@@ -6,6 +6,7 @@ import android.util.Log;
 import com.centerm.smartpos.aidl.psam.AidlPsam;
 import com.centerm.smartpos.util.AidlErrorCode;
 import com.centerm.smartpos.util.HexUtil;
+import com.myhand.common.Converter;
 import com.myhand.devices.CPUDevice;
 import com.myhand.devices.PSAMDevice;
 
@@ -30,13 +31,6 @@ public class SHTCPsamCard extends PSAMCard{
 
 
     private String posNo;
-    private String keyVersion;
-
-    public String getKeyVersion()
-    {
-        return keyVersion;
-    }
-
     public String getPosNo()
     {
         return posNo;
@@ -52,6 +46,7 @@ public class SHTCPsamCard extends PSAMCard{
         }
 
         posNo=HexUtil.bytesToHexString(CPUDevice.getResponseData(ret));
+        setPosID(CPUDevice.getResponseData(ret));
         Log.d(tag,String.format("PosNO:%s",posNo));
 
         return true;
@@ -67,7 +62,7 @@ public class SHTCPsamCard extends PSAMCard{
         return true;
     }
 
-    public boolean readKeyVersion(PSAMDevice psamDevice)
+    public boolean psamReadKeyVersion(PSAMDevice psamDevice)
     {
         if(!selFile(psamDevice))
         {
@@ -79,7 +74,13 @@ public class SHTCPsamCard extends PSAMCard{
         {
             return false;
         }
-        keyVersion=HexUtil.bytesToHexString(CPUDevice.getResponseData(ret));
+        String errorCode=CPUDevice.parseResponse(ret);
+        if(errorCode.compareTo("9000")!=0){
+            Log.d(tag,String.format("选择0017文件失败，apud:%s result:%s",APDUSel0017,HexUtil.bytesToHexString(ret)));
+            return false;
+        }
+        psamDevice.getPsamCard().setKeyVersion((byte) Converter.BytesToLong(CPUDevice.getResponseData(ret)));
+        //keyVersion=HexUtil.bytesToHexString();
         return true;
     }
 }

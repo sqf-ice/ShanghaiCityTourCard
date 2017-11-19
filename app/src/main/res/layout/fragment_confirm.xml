@@ -2,51 +2,51 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.myhand.shanghaicitytourcard.com.myhand.citytourcar.Pay_Rdcard_Prompt_Fragment">
+    tools:context="com.myhand.citytourcar.ConfirmFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="10dp"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <ProgressBar
-                android:id="@+id/progressBarReadCard"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
             <TextView
-                android:id="@+id/textViewPrompt"
+                android:id="@+id/textViewMessage"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="@string/cardpaypromptmsg"
+                android:text="@string/hello_blank_fragment"
                 android:textSize="24sp" />
+
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/linearLayoutButton"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonOK"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="确定"
+                android:textSize="24sp" />
 
             <Button
                 android:id="@+id/buttonCancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="取消" />
-        </LinearLayout>
+                android:text="取消"
+                android:textSize="24sp" />
 
+        </LinearLayout>
     </LinearLayout>
 
 </FrameLayout>

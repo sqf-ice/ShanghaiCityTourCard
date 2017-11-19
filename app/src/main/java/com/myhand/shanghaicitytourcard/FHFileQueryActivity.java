@@ -11,9 +11,8 @@ import android.widget.ListView;
 
 import com.myhand.POS.DatabaseSHCT;
 import com.myhand.POS.FileMaker;
-import com.myhand.POS.RegistFile;
+import com.myhand.POS.POSApplication;
 import com.myhand.control.FHFileUploadInfoAdapter;
-import com.myhand.control.RegistFileAdapter;
 import com.myhand.shtcdatafile.FHFileUploadInfo;
 
 import java.util.List;
@@ -46,7 +45,7 @@ public class FHFileQueryActivity extends AppCompatActivity {
         btnQueryRegistFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DatabaseSHCT db=POSApplication.instance.getAppDatabase();
+                DatabaseSHCT db= POSApplication.instance.getAppDatabase();
                 fhFileUploadInfoList=db.getFHFileList("");
 
                 fhFileUploadInfoAdapter=new FHFileUploadInfoAdapter(FHFileQueryActivity.this,fhFileUploadInfoList);

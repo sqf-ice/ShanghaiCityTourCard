@@ -1,4 +1,4 @@
-package com.myhand.shanghaicitytourcard;
+package com.myhand.manage;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,9 +10,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.myhand.POS.POSApplication;
 import com.myhand.POS.User;
 import com.myhand.devices.V8Sounder;
-import com.myhand.manage.AdminActivity;
+import com.myhand.shanghaicitytourcard.R;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String tag=LoginActivity.class.getSimpleName();
@@ -40,7 +41,9 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         editTextUsername=(EditText)findViewById(R.id.editTextUsername);
+        editTextUsername.setText("1001");
         editTextPassword=(EditText)findViewById(R.id.editTextPassword);
+        editTextPassword.setText("123456");
         buttonLogin=(Button)findViewById(R.id.buttonLogin);
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             @Override

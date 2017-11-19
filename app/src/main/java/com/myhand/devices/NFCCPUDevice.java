@@ -28,4 +28,9 @@ public class NFCCPUDevice extends RFCPUDevice{
     public byte readChipType() {
         return 0;
     }
+
+    @Override
+    public void close() {
+
+    }
 }

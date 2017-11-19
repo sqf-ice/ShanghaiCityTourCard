@@ -14,12 +14,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
-import com.centerm.smartpos.aidl.sys.AidlDeviceManager;
 import com.myhand.POS.DatabaseSHCT;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.devices.POSDevice;
-import com.myhand.shanghaicitytourcard.BaseTourCardActivity;
-import com.myhand.shanghaicitytourcard.POSApplication;
+import com.myhand.POS.POSApplication;
 import com.myhand.shanghaicitytourcard.PrintActivity;
 import com.myhand.shanghaicitytourcard.R;
 import com.myhand.shtcdatafile.SHTCClient;
@@ -173,7 +171,7 @@ SendDataFragment.OnFragmentInteractionListener{
 
     public void sendData(){
         loadFragment(1);
-        if(listDebitRecord.size()<=0){
+        if(listDebitRecord.size()>0){
             sendDataFragment.showMessage(0,1,String.format("正在连接服务器，请等待......"));
             new ThreadSendData().start();
         }

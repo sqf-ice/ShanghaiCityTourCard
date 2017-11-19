@@ -1,19 +1,13 @@
 package com.myhand.devices;
 
-import android.graphics.Color;
-import android.os.RemoteException;
-
 import com.centerm.smartpos.aidl.printer.AidlPrinter;
-import com.centerm.smartpos.aidl.printer.AidlPrinterStateChangeListener;
 import com.centerm.smartpos.aidl.printer.PrintDataObject;
-import com.centerm.smartpos.constant.DeviceErrorCode;
 import com.centerm.smartpos.util.HexUtil;
 import com.myhand.common.Converter;
 import com.myhand.cpucard.DebitRecord;
 import com.myhand.cpucard.SHTCCPUUserCard;
 import com.myhand.manage.SettleSum;
-import com.myhand.shanghaicitytourcard.POSApplication;
-import com.myhand.shanghaicitytourcard.R;
+import com.myhand.POS.POSApplication;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

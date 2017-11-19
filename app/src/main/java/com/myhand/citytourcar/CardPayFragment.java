@@ -10,9 +10,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.centerm.smartpos.util.HexUtil;
+import com.myhand.POS.POSApplication;
 import com.myhand.shanghaicitytourcard.CityTourCard;
 import com.myhand.shanghaicitytourcard.PayFragment;
 import com.myhand.shanghaicitytourcard.R;
@@ -40,11 +42,15 @@ public class CardPayFragment extends PayFragment {
     private String mParam1;
     private String mParam2;
 
+    private TextView textViewCardNo;
+    private TextView textViewBalance;
+
     private EditText editTextPayAmount;
+
     private Button buttonPay;
     private Button buttonCancel;
+    private LinearLayout linearLayoutMessage;
     private TextView textViewErrorMessage;
-    private TextView textViewBalance;
 
     private OnFragmentInteractionListener mListener;
 
@@ -81,6 +87,7 @@ public class CardPayFragment extends PayFragment {
     }
 
     private void init(View view){
+        textViewCardNo=(TextView)view.findViewById(R.id.textViewCardNo);
         editTextPayAmount=(EditText) view.findViewById(R.id.editTextPayAmount);
         textViewErrorMessage=(TextView)view.findViewById(R.id.textViewErrorMessage);
         textViewBalance=(TextView)view.findViewById(R.id.textviewBalance) ;
@@ -90,13 +97,25 @@ public class CardPayFragment extends PayFragment {
             @Override
             public void onClick(View v) {
                 ShowErrorMessage(0,"");
-                CityTourCard card= getPayActivity().card;
+                CityTourCard card= getPayActivity().payCard;
                 if(card==null){
                     ShowErrorMessage(1,"请刷卡......");
                     return;
                 }
+/*
+                //判断余额是否超过1000
+                if(card.getBalance()>100000){
+                    ShowErrorMessage(1,String.format("卡余额超过1000元，实际值：%.2f",(float)card.getBalance()/100f));
+                    return;
+                }
+*/
+                //判断是否是MAC2问题卡
+                if(POSApplication.instance.getAppDatabase().isMac2ErrCard(card.getInnerCardNoStr())){
+                    ShowErrorMessage(1,String.format("无效卡（MAC2错误卡）"));
+                    return;
+                }
                 //卡类型判断
-                if(card.getTypeIn05()<0x48||card.getTypeIn05()>0x72){
+                if(card.getTypeIn05()<0x48||card.getTypeIn05()>0x4F){
                     ShowErrorMessage(1,String.format("不支持卡类型在（0x48~0x72）之外的卡消费，当前卡类型为：%02X",card.getTypeIn05()));
                     return;
                 }
@@ -121,18 +140,25 @@ public class CardPayFragment extends PayFragment {
                     ShowErrorMessage(1,"请输入消费金额");
                     return;
                 }
-                float payAmount=Float.parseFloat(payAmountStr);
+                getPayActivity().payAmount=(int)(Float.parseFloat(payAmountStr)*100);
+/*
                 if(payAmount<=0){
                     ShowErrorMessage(1,"消费金额必须大于0");
                     return;
                 }
-                if(payAmount*100>getPayActivity().card.getBalance()){
+
+                //判断余额是否足够
+                if(payAmount*100>getPayActivity().payCard.getBalance()){
                     ShowErrorMessage(1,"卡余额不足");
                     return;
                 }
+*/
+
+                //getPayActivity().showPayPrompt();
+                getPayActivity().cardDebit();
 
 //                getPayActivity().printPayNote();
-                getPayActivity().showPayPrompt();
+                //getPayActivity().showPayPrompt();
 /*
                 if(getPayActivity().posDevice.complexDebit(getPayActivity().card,(int)(payAmount*100))==null)
                 {
@@ -209,12 +235,14 @@ public class CardPayFragment extends PayFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if(getPayActivity().card!=null) {
-            showBalance(getPayActivity().card.getBalance());
-            if(getPayActivity().card!=null) {
+        if(getPayActivity().payCard!=null) {
+            CityTourCard card=getPayActivity().payCard;
+            textViewCardNo.setText(card.getFaceNumber());
+            showBalance(getPayActivity().payCard.getBalance());
+            if(getPayActivity().payCard!=null) {
                 ShowErrorMessage(0,String.format("卡类型：%02X 有效期：%s",
-                        getPayActivity().card.getFCIValidData().getCardType(),
-                        HexUtil.bytesToHexString(getPayActivity().card.getFCIValidData().getValidDate())));
+                        getPayActivity().payCard.getFCIValidData().getCardType(),
+                        HexUtil.bytesToHexString(getPayActivity().payCard.getFCIValidData().getValidDate())));
             }
         }
     }

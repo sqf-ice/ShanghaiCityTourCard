@@ -1,7 +1,5 @@
 package com.myhand.shanghaicitytourcard;
 
-import android.bluetooth.BluetoothClass;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.design.widget.FloatingActionButton;
@@ -21,12 +19,9 @@ import com.centerm.smartpos.aidl.soundplayer.AidlSoundPlayer;
 import com.centerm.smartpos.aidl.sys.AidlDeviceManager;
 import com.centerm.smartpos.constant.Constant;
 import com.centerm.smartpos.util.HexUtil;
-import com.myhand.common.Converter;
-import com.myhand.cpucard.CPUUserCard;
+import com.myhand.POS.POSApplication;
 import com.myhand.cpucard.SHTCPsamCard;
-import com.myhand.devices.DeviceV8;
 import com.myhand.devices.POSDevice;
-import com.myhand.devices.RFCPUDevice;
 import com.myhand.devices.V8PsamDevice;
 import com.myhand.devices.V8RFCPUDevice;
 import com.myhand.devices.V8Sounder;

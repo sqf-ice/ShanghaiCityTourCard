@@ -1,5 +1,7 @@
 package com.myhand.common;
 
+import android.util.Log;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -10,6 +12,7 @@ import java.util.logging.SimpleFormatter;
  */
 
 public class Converter {
+    private static final String tag=Converter.class.getSimpleName();
     public static long BytesToLong(byte[] src)
     {
         if(src==null||src.length==0)
@@ -38,6 +41,22 @@ public class Converter {
         return result;
     }
 
+    public static byte[] incBytes(byte[] src){
+        long tmpLong=0;
+        for(int i=0;i<src.length;i++){
+            Log.d(tag,String.format("src[%d]=%02X",i,(src[i]&0xFF)));
+            tmpLong=tmpLong*256+(src[i]&0xFF);
+        }
+        tmpLong++;
+        Log.d(tag,String.format("incBytes(byte[] src),tmpLong=%d",tmpLong));
+        byte[] result=new byte[src.length];
+        for(int i=src.length-1;i>=0;i--){
+            result[i]=(byte) (((byte)tmpLong)&0xFF);
+            tmpLong=tmpLong>>8;
+        }
+        return result;
+    }
+
     public static byte[] LongToBytes(long amount)
     {
         byte[] result=new byte[8];
@@ -45,7 +64,7 @@ public class Converter {
         for(int i=7;i>=0;i--)
         {
             result[i]=(byte)(temp&0xFF);
-            temp=amount>>8;
+            temp=temp>>8;
         }
         return result;
     }
